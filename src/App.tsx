@@ -15,114 +15,168 @@ import ivyCornerRightGltf from '../assets/gltf/ivy_corner_x4_r.gltf?url';
 import ivyInnerLeftGltf from '../assets/gltf/ivy_inner_x4_l.gltf?url';
 import ivyInnerRightGltf from '../assets/gltf/ivy_inner_x4_r.gltf?url';
 
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { OrbitControls } from "@react-three/drei";
-
-
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { OrbitControls } from '@react-three/drei';
 
 import './App.css';
 
 import { absolute, flexCenter, fullSize } from './styles';
 import { useEffect, useState } from 'react';
 
-interface ModelProps  { url: string, primitiveProps?: Omit<PrimitiveProps, "object"> }
+const useIteration = (fps: number = 60) => {
+  const [i, setI] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setI((i) => i + 1);
+    }, 1000 / fps);
+    return () => clearInterval(interval);
+  }, [fps]);
+
+  return i;
+};
+
+interface ModelProps {
+  url: string;
+  primitiveProps?: Omit<PrimitiveProps, 'object'>;
+}
 
 const Model = (props: ModelProps) => {
   const { url, primitiveProps } = props;
   const gltf = useLoader(GLTFLoader, url);
 
-  return (
-    <primitive object={gltf.scene} scale={0.1} {...primitiveProps} />
-  );
-}
+  return <primitive object={gltf.scene.clone()} scale={0.1} {...primitiveProps} />;
+};
 
-interface SubModelProps extends Omit<PrimitiveProps, "object"> {
-
-}
+interface SubModelProps extends Omit<PrimitiveProps, 'object'> {}
 
 const IvyCore = (props: SubModelProps) => {
-  return (
-    <Model url={ivyCoreGltf} primitiveProps={props} />
-  );
-}
+  return <Model url={ivyCoreGltf} primitiveProps={props} />;
+};
 
 const IvyCenterLeft = (props: SubModelProps) => {
-  return (
-    <Model url={ivyCenterLeftGltf}  primitiveProps={props} />
-  );
-}
+  return <Model url={ivyCenterLeftGltf} primitiveProps={props} />;
+};
 
 const IvyCenterRight = (props: SubModelProps) => {
-  return (
-    <Model url={ivyCenterRightGltf}  primitiveProps={props} />
-  );
-}
+  return <Model url={ivyCenterRightGltf} primitiveProps={props} />;
+};
 
 const IvyCornerStubLeft = (props: SubModelProps) => {
-  return (
-    <Model url={ivyCornerStubLeftGltf}  primitiveProps={props} />
-  );
-}
+  return <Model url={ivyCornerStubLeftGltf} primitiveProps={props} />;
+};
 
 const IvyCornerStubRight = (props: SubModelProps) => {
-  return (
-    <Model url={ivyCornerStubRightGltf}  primitiveProps={props} />
-  );
-}
+  return <Model url={ivyCornerStubRightGltf} primitiveProps={props} />;
+};
 
 const IvyCornerLeft = (props: SubModelProps) => {
-  return (
-    <Model url={ivyCornerLeftGltf}  primitiveProps={props} />
-  );
-}
+  return <Model url={ivyCornerLeftGltf} primitiveProps={props} />;
+};
 
 const IvyCornerRight = (props: SubModelProps) => {
-  return (
-    <Model url={ivyCornerRightGltf}  primitiveProps={props} />
-  );
-}
+  return <Model url={ivyCornerRightGltf} primitiveProps={props} />;
+};
 
 const IvyInnerLeft = (props: SubModelProps) => {
-  return (
-    <Model url={ivyInnerLeftGltf}  primitiveProps={props} />
-  );
-}
+  return <Model url={ivyInnerLeftGltf} primitiveProps={props} />;
+};
 
 const IvyInnerRight = (props: SubModelProps) => {
-  return (
-    <Model url={ivyInnerRightGltf}  primitiveProps={props} />
-  );
-}
+  return <Model url={ivyInnerRightGltf} primitiveProps={props} />;
+};
 
 const IvyCenter = (props: MeshProps) => {
-  const [i, setI] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setI(i => i + 1);
-    }, 1000 / 60);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
     <mesh {...props}>
-      <IvyCenterLeft rotation={[0,0,0]} position={[0,0,1.15]} />
-      <IvyCenterRight rotation={[0, 0, Math.PI]} scale={[.1, .1, -.1]} position={[0,0,-1.15]}/>
+      <mesh rotation={[0, Math.PI, Math.PI / 4]}>
+        <IvyCenterLeft rotation={[0, 0, 0]} position={[0, 0, 1.15]} />
+        <IvyCenterRight rotation={[Math.PI, 0, -Math.PI / 2]} position={[0, 0, -1.15]} />
+      </mesh>
     </mesh>
   );
-}
+};
 
 const IvyCorner = (props: SubModelProps) => {
   return (
-    <mesh>
-      <IvyCornerLeft rotation={[0,0,0]} position={[0,0,1.15]} />
-      <IvyCornerRight rotation={[0, 0, Math.PI]} position={[0,0,-1.15]} />
+    <mesh {...props}>
+      <mesh rotation={[0, (Math.PI * 3) / 4, Math.PI / 4]}>
+        <mesh position={[0.71, 2.48, 0]}>
+          <IvyCornerLeft rotation={[0, 0, 0]} position={[0, 0, 2.417]} />
+          <IvyCornerRight
+            rotation={[Math.PI, 0, Math.PI / 2]}
+            position={[0, 0, -2.417]}
+          />
+        </mesh>
+      </mesh>
     </mesh>
   );
+};
+
+const IvyMainCore = (props: MeshProps) => {
+  return (
+    <mesh {...props}>
+      <IvyCore position={[0, 0, 3]} />
+      <IvyCore position={[0, 0, -3]} rotation={[0, Math.PI, 0]} />
+    </mesh>
+  );
+};
+
+interface IvyCornersProps extends MeshProps {
+  offset?: number;
 }
 
-function App() {
+const IvyCorners = (props: IvyCornersProps) => {
+  const { offset = 5, ...rest } = props;
 
+  return (
+    <mesh {...rest}>
+      <IvyCorner position={[-offset, -offset, -offset]} />
+      <IvyCorner position={[offset, offset, -offset]} rotation={[0, 0, Math.PI]} />
+      <IvyCorner position={[offset, -offset, offset]} rotation={[0, Math.PI, 0]} />
+      <IvyCorner position={[-offset, offset, offset]} rotation={[Math.PI, 0, 0]} />
+    </mesh>
+  );
+};
+
+interface IvyCentersProps extends MeshProps {
+  offset?: number;
+}
+
+const IvyCenters = (props: IvyCentersProps) => {
+  const { offset = 5, ...rest } = props;
+
+  return (
+    <mesh {...rest}>
+      <IvyCenter position={[-offset, 0, 0]} rotation={[-Math.PI / 4, 0, 0]} />
+      <IvyCenter position={[offset, 0, 0]} rotation={[Math.PI / 4, 0, Math.PI]} />
+      <IvyCenter
+        position={[0, 0, offset]}
+        rotation={[Math.PI / 2, Math.PI / 4, -Math.PI / 2]}
+      />
+      <IvyCenter
+        position={[0, 0, -offset]}
+        rotation={[-Math.PI / 2, Math.PI / 4, -Math.PI / 2]}
+      />
+      <IvyCenter position={[0, offset, 0]} rotation={[0, -Math.PI / 4, -Math.PI / 2]} />
+      <IvyCenter position={[0, -offset, 0]} rotation={[0, Math.PI / 4, Math.PI / 2]} />
+    </mesh>
+  );
+};
+
+const IvyCube = (props: MeshProps) => {
+  const offset = 4;
+
+  return (
+    <mesh {...props}>
+      {/* <IvyMainCore /> */}
+      <IvyCorners offset={offset} />
+      <IvyCenters offset={offset} />
+    </mesh>
+  );
+};
+
+function App() {
   return (
     <div css={[absolute(), fullSize, flexCenter]}>
       <Canvas>
@@ -131,10 +185,9 @@ function App() {
         <directionalLight position={[0, 0, -5]} color="blue" />
         <directionalLight position={[0, 5, 0]} color="green" />
         <directionalLight position={[0, -5, 0]} color="cyan" />
-        <IvyCenter position={[0,40,0]} />
-        <IvyCorner />
+        <IvyCube />
         <OrbitControls />
-
+        <axesHelper args={[5]} />
 
         {/* <mesh rotation={[1,0,0]}>
           <boxGeometry args={[2,2,2]}/>
