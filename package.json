@@ -10,7 +10,6 @@
     "lint:fix": "eslint . --fix",
     "lint:format": "prettier . --list-different --write",
     "lint": "yarn lint:format && yarn lint:fix",
-    "lint:pre-commit": "eslint . --max-warnings=0",
     "type-check": "tsc",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
@@ -39,18 +38,13 @@
     "@vitejs/plugin-react": "^2.2.0",
     "babel-loader": "^8.2.5",
     "eslint": "^8.26.0",
-    "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-jsx-a11y": "^6.6.1",
-    "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-react": "^7.31.10",
-    "eslint-plugin-simple-import-sort": "^8.0.0",
     "eslint-plugin-storybook": "^0.6.8",
-    "pre-commit": "^1.2.2",
     "prettier": "^2.7.1",
     "typescript": "^4.8.4",
     "vite": "^3.2.7"
   },
-  "pre-commit": "lint:pre-commit",
   "license": "MIT"
 }

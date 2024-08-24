@@ -29,23 +29,13 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:react/recommended',
     'plugin:jsx-a11y/recommended',
-    'plugin:prettier/recommended',
     'plugin:storybook/recommended',
   ],
-  plugins: ['simple-import-sort', 'prettier'],
+  plugins: [],
   rules: {
-    'prettier/prettier': [
-      'warn',
-      {},
-      {
-        usePrettierrc: true,
-      },
-    ],
     'react/react-in-jsx-scope': 'off',
     'jsx-a11y/accessible-emoji': 'off',
     'react/prop-types': 'off',
-    'simple-import-sort/imports': 'warn',
-    'simple-import-sort/exports': 'warn',
     'jsx-a11y/anchor-is-valid': [
       'error',
       {
