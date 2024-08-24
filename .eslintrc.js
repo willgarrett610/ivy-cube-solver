@@ -30,8 +30,9 @@ module.exports = {
     'plugin:react/recommended',
     'plugin:jsx-a11y/recommended',
     'plugin:storybook/recommended',
+    'plugin:@react-three/recommended',
   ],
-  plugins: [],
+  plugins: ['@react-three'],
   rules: {
     'react/react-in-jsx-scope': 'off',
     'jsx-a11y/accessible-emoji': 'off',

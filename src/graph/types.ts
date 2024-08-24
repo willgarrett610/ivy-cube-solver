@@ -1,0 +1,64 @@
+class GNode {
+  state: State;
+  neighbors: GNode[];
+
+  constructor(state: State) {
+    this.state = state;
+    this.neighbors = [];
+  }
+}
+
+class State {
+  corners: number[];
+  centers: number[];
+
+  constructor(corners: number[], centers: number[]) {
+    this.corners = corners;
+    this.centers = centers;
+  }
+
+  static solved = () => new State([0, 0, 0, 0], [0, 1, 2, 3, 4, 5]);
+
+  rotate(corner: number, clockwise: boolean): State {
+    const corners: number[] = this.corners.map((v) => v);
+    const centers: number[] = this.centers.map((v) => v);
+
+    corners[corner] = (this.corners[corner] + (clockwise ? 1 : 2)) % 3;
+
+    let swaps: number[] = [];
+    switch (corner) {
+      case 0:
+        swaps = [0, 4, 1];
+        break;
+      case 1:
+        swaps = [4, 2, 3];
+        break;
+      case 2:
+        swaps = [1, 2, 5];
+        break;
+      case 3:
+        swaps = [0, 5, 3];
+        break;
+    }
+
+    if (clockwise) {
+      centers[swaps[0]] = this.centers[swaps[2]];
+      centers[swaps[1]] = this.centers[swaps[0]];
+      centers[swaps[2]] = this.centers[swaps[1]];
+    } else {
+      centers[swaps[0]] = this.centers[swaps[1]];
+      centers[swaps[1]] = this.centers[swaps[2]];
+      centers[swaps[2]] = this.centers[swaps[0]];
+    }
+
+    return new State(corners, centers);
+  }
+
+  findOrCreate(visited: Map<State, GNode>) {
+    if (visited.has(this)) {
+      return visited.get(this) as GNode;
+    }
+
+    return new GNode(this);
+  }
+}
