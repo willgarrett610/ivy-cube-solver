@@ -22,6 +22,8 @@ import './App.css';
 
 import { absolute, flexCenter, fullSize } from './styles';
 import { useEffect, useState } from 'react';
+import { MeshBasicMaterial, MeshStandardMaterial } from 'three';
+import * as THREE from 'three';
 
 const useIteration = (fps: number = 60) => {
   const [i, setI] = useState(0);
@@ -41,11 +43,23 @@ interface ModelProps {
   primitiveProps?: Omit<PrimitiveProps, 'object'>;
 }
 
+const BasicMaterial = new MeshBasicMaterial({ color: new THREE.Color('#520B3E') });
+
 const Model = (props: ModelProps) => {
   const { url, primitiveProps } = props;
   const gltf = useLoader(GLTFLoader, url);
 
-  return <primitive object={gltf.scene.clone()} scale={0.1} {...primitiveProps} />;
+  console.log(gltf.materials);
+  Object.values(gltf.materials).forEach((material) => {
+    material.color = new THREE.Color('#520B3E');
+  });
+
+  return (
+    <>
+      <primitive object={gltf.scene.clone()} scale={0.1} {...primitiveProps} />;
+      <meshStandardMaterial color={'blue'} />
+    </>
+  );
 };
 
 interface SubModelProps extends Omit<PrimitiveProps, 'object'> {}
@@ -90,7 +104,11 @@ const IvyCenter = (props: MeshProps) => {
   return (
     <mesh {...props}>
       <mesh rotation={[0, Math.PI, Math.PI / 4]}>
-        <IvyCenterLeft rotation={[0, 0, 0]} position={[0, 0, 1.15]} />
+        <IvyCenterLeft
+          rotation={[0, 0, 0]}
+          position={[0, 0, 1.15]}
+          material={new MeshBasicMaterial({ color: 'red' })}
+        />
         <IvyCenterRight rotation={[Math.PI, 0, -Math.PI / 2]} position={[0, 0, -1.15]} />
       </mesh>
     </mesh>
@@ -148,7 +166,11 @@ const IvyCenters = (props: IvyCentersProps) => {
 
   return (
     <mesh {...rest}>
-      <IvyCenter position={[-offset, 0, 0]} rotation={[-Math.PI / 4, 0, 0]} />
+      <IvyCenter
+        position={[-offset, 0, 0]}
+        rotation={[-Math.PI / 4, 0, 0]}
+        material={new MeshStandardMaterial({ color: 'red' })}
+      />
       <IvyCenter position={[offset, 0, 0]} rotation={[Math.PI / 4, 0, Math.PI]} />
       <IvyCenter
         position={[0, 0, offset]}
@@ -181,18 +203,19 @@ function App() {
     <div css={[absolute(), fullSize, flexCenter]}>
       <Canvas>
         <ambientLight />
-        <directionalLight position={[0, 0, 5]} color="red" />
-        <directionalLight position={[0, 0, -5]} color="blue" />
-        <directionalLight position={[0, 5, 0]} color="green" />
-        <directionalLight position={[0, -5, 0]} color="cyan" />
+        <directionalLight position={[0, 0, 5]} color="white" />
+        <directionalLight position={[0, 0, -5]} color="white" />
+        <directionalLight position={[0, 5, 0]} color="white" />
+        <directionalLight position={[0, -5, 0]} color="white" />
         <IvyCube />
         <OrbitControls />
         <axesHelper args={[5]} />
 
-        {/* <mesh rotation={[1,0,0]}>
-          <boxGeometry args={[2,2,2]}/>
-          <meshStandardMaterial />
-        </mesh> */}
+        <mesh>
+          {/* basic cube */}
+          <boxGeometry args={[1, 1, 1]} />
+          <meshBasicMaterial color="red" opacity={0.1} />
+        </mesh>
       </Canvas>
     </div>
   );
