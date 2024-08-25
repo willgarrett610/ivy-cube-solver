@@ -100,7 +100,6 @@ export const IvyCenters = (props: IvyCentersProps) => {
 
   useEffect(() => {
     if (turn) {
-      console.log('resetting');
       reset();
     }
   }, [turn, reset]);
