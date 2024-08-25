@@ -7,6 +7,7 @@ import { easeInOutCubic, lerp } from '../../utils/math';
 import { useEffect, useMemo } from 'react';
 import { Rotate } from '../three/Rotate';
 import { cornerAxes } from './IvyCorners';
+import { is } from '@react-three/fiber/dist/declarations/src/core/utils';
 
 const centerMapping: Record<number, string> = {
   0: cubeColors.blue,
@@ -23,6 +24,59 @@ const cornerToCenterMapping: Record<number, number[]> = {
   2: [1, 2, 5],
   3: [0, 5, 3],
 };
+
+interface CenterData {
+  position: [number, number, number];
+  rotation: [number, number, number];
+  colors: {
+    background: string;
+  };
+}
+
+const centersData: CenterData[] = [
+  {
+    position: [0, 0, -1],
+    rotation: [-Math.PI / 2, 0, Math.PI / 2],
+    colors: {
+      background: cubeColors.internals,
+    },
+  },
+  {
+    position: [0, -1, 0],
+    rotation: [-Math.PI / 2, Math.PI / 2, 0],
+    colors: {
+      background: cubeColors.internals,
+    },
+  },
+  {
+    position: [0, 0, 1],
+    rotation: [Math.PI / 2, 0, Math.PI / 2],
+    colors: {
+      background: cubeColors.internals,
+    },
+  },
+  {
+    position: [0, 1, 0],
+    rotation: [Math.PI / 2, Math.PI / 2, 0],
+    colors: {
+      background: cubeColors.internals,
+    },
+  },
+  {
+    position: [-1, 0, 0],
+    rotation: [0, 0, Math.PI],
+    colors: {
+      background: cubeColors.internals,
+    },
+  },
+  {
+    position: [1, 0, 0],
+    rotation: [0, 0, 0],
+    colors: {
+      background: cubeColors.internals,
+    },
+  },
+];
 
 const fps = 30;
 
@@ -69,75 +123,35 @@ export const IvyCenters = (props: IvyCentersProps) => {
 
   return (
     <mesh {...meshProps}>
-      <Rotate
-        angle={isTurning && turningCenters.includes(0) ? angle : 0}
-        axis={turningAxis}
-      >
-        <IvyCenter
-          meshProps={{
-            position: [0, 0, -offset],
-            rotation: [-Math.PI / 2, 0, Math.PI / 2],
-          }}
-          colors={{ background: cubeColors.internals, face: centerMapping[centers[0]] }}
-        />
-      </Rotate>
-      <Rotate
-        angle={isTurning && turningCenters.includes(1) ? angle : 0}
-        axis={turningAxis}
-      >
-        <IvyCenter
-          meshProps={{
-            position: [0, -offset, 0],
-            rotation: [-Math.PI / 2, Math.PI / 2, 0],
-          }}
-          colors={{ background: cubeColors.internals, face: centerMapping[centers[1]] }}
-        />
-      </Rotate>
-      <Rotate
-        angle={isTurning && turningCenters.includes(2) ? angle : 0}
-        axis={turningAxis}
-      >
-        <IvyCenter
-          meshProps={{
-            position: [0, 0, offset],
-            rotation: [Math.PI / 2, 0, Math.PI / 2],
-          }}
-          colors={{ background: cubeColors.internals, face: centerMapping[centers[2]] }}
-        />
-      </Rotate>
-      <Rotate
-        angle={isTurning && turningCenters.includes(3) ? angle : 0}
-        axis={turningAxis}
-      >
-        <IvyCenter
-          meshProps={{
-            position: [0, offset, 0],
-            rotation: [Math.PI / 2, Math.PI / 2, 0],
-          }}
-          colors={{ background: cubeColors.internals, face: centerMapping[centers[3]] }}
-        />
-      </Rotate>
-      <Rotate
-        angle={isTurning && turningCenters.includes(4) ? angle : 0}
-        axis={turningAxis}
-      >
-        <IvyCenter
-          meshProps={{
-            position: [-offset, 0, 0],
-            rotation: [0, 0, Math.PI],
-          }}
-          colors={{ background: cubeColors.internals, face: centerMapping[centers[4]] }}
-        />
-      </Rotate>
-      <Rotate
-        angle={isTurning && turningCenters.includes(5) ? angle : 0}
-        axis={turningAxis}
-      >
-        <IvyCenter
-          meshProps={{ position: [offset, 0, 0] }}
-          colors={{ background: cubeColors.internals, face: centerMapping[centers[5]] }}
-        />
-      </Rotate>
+      {centersData.map((centerData, i) => {
+        const centerComponent = (
+          <IvyCenter
+            key={i}
+            meshProps={{
+              position: centerData.position.map((v) => v * offset) as [
+                number,
+                number,
+                number,
+              ],
+              rotation: centerData.rotation,
+            }}
+            colors={{
+              background: centerData.colors.background,
+              face: centerMapping[centers[i]],
+            }}
+          />
+        );
+
+        if (isTurning && turningCenters.includes(i)) {
+          return (
+            <Rotate key={i} angle={angle} axis={turningAxis}>
+              {centerComponent}
+            </Rotate>
+          );
+        }
+
+        return centerComponent;
+      })}
     </mesh>
   );
 };
