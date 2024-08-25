@@ -37,9 +37,6 @@ export default function genGraph() {
     next = exploreQ.dequeue();
   }
 
-  console.log(maxDistance);
-  console.log(maxNode);
-
   return solvedNode;
 }
 
@@ -68,4 +65,16 @@ function getNeighbors(node: GNode, visitedNodes: Map<number, GNode>) {
   neighbors.push(makeEdge(3, true, state, visitedNodes));
 
   return neighbors;
+}
+
+function getSolvePath(node: GNode) {
+  const states: State[] = [];
+
+  while (node.distance > 0) {
+    states.push(node.state);
+    node = node.neighbors[node.solvedPath as number].node;
+  }
+  states.push(node.state);
+
+  return states;
 }
