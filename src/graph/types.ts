@@ -120,3 +120,13 @@ export class State {
     };
   }
 }
+
+export enum TurnDirection {
+  Clockwise = 1,
+  CounterClockwise = -1,
+}
+
+export interface Turn {
+  corner: 0 | 1 | 2 | 3;
+  turnDirection: TurnDirection;
+}

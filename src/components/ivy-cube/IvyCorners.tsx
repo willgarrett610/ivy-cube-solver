@@ -1,26 +1,54 @@
 import { MeshProps } from '@react-three/fiber';
-import { StateDto } from '../../graph/types';
+import { StateDto, Turn } from '../../graph/types';
 import { cubeColors } from '../../utils';
 import { Vector3 } from '../../utils/math/Vector3';
 import { Rotate } from '../three/Rotate';
 import { IvyCorner } from './IvyCorner';
+import { useScale } from '../../utils/react/hooks';
+import { easeInOutCubic } from '../../utils/math';
+import { lerp } from 'three/src/math/MathUtils';
+import { useEffect } from 'react';
+
+const fps = 30;
+
+export const cornerAxes = {
+  0: new Vector3(-1, -1, -1).normalized.asTuple,
+  1: new Vector3(-1, 1, 1).normalized.asTuple,
+  2: new Vector3(1, -1, 1).normalized.asTuple,
+  3: new Vector3(1, 1, -1).normalized.asTuple,
+};
 
 export interface IvyCornersProps {
   offset?: number;
   meshProps?: MeshProps;
   cubeState: StateDto;
+  turn?: Turn;
 }
 
 export const IvyCorners = (props: IvyCornersProps) => {
-  const { offset = 0, meshProps, cubeState } = props;
+  const { turn, offset = 0, meshProps, cubeState } = props;
+
+  const { value: t, reset, isPlaying } = useScale(0, 1, fps, 2_500);
+  const v = easeInOutCubic(t);
+  const angle = lerp(0, (2 * Math.PI) / 3, v);
+
+  useEffect(() => {
+    if (turn) {
+      reset();
+    }
+  }, [turn, reset]);
+
+  const isTurning = turn && isPlaying && t < 1;
 
   const { corners } = cubeState;
 
   return (
     <mesh {...meshProps}>
       <Rotate
-        angle={(-corners[0] * (2 * Math.PI)) / 3}
-        axis={new Vector3(-1, -1, -1).normalized.asTuple}
+        angle={
+          (-corners[0] * (2 * Math.PI)) / 3 + (isTurning && turn.corner === 0 ? angle : 0)
+        }
+        axis={cornerAxes[0]}
       >
         <IvyCorner
           meshProps={{
@@ -36,8 +64,10 @@ export const IvyCorners = (props: IvyCornersProps) => {
         />
       </Rotate>
       <Rotate
-        angle={(-corners[1] * (2 * Math.PI)) / 3}
-        axis={new Vector3(-1, 1, 1).normalized.asTuple}
+        angle={
+          (-corners[1] * (2 * Math.PI)) / 3 + (isTurning && turn.corner === 1 ? angle : 0)
+        }
+        axis={cornerAxes[1]}
       >
         <IvyCorner
           meshProps={{
@@ -53,8 +83,10 @@ export const IvyCorners = (props: IvyCornersProps) => {
         />
       </Rotate>
       <Rotate
-        angle={(-corners[2] * (2 * Math.PI)) / 3}
-        axis={new Vector3(1, -1, 1).normalized.asTuple}
+        angle={
+          (-corners[2] * (2 * Math.PI)) / 3 + (isTurning && turn.corner === 2 ? angle : 0)
+        }
+        axis={cornerAxes[2]}
       >
         <IvyCorner
           meshProps={{
@@ -70,8 +102,10 @@ export const IvyCorners = (props: IvyCornersProps) => {
         />
       </Rotate>
       <Rotate
-        angle={(-corners[3] * (2 * Math.PI)) / 3}
-        axis={new Vector3(1, 1, -1).normalized.asTuple}
+        angle={
+          (-corners[3] * (2 * Math.PI)) / 3 + (isTurning && turn.corner === 3 ? angle : 0)
+        }
+        axis={cornerAxes[3]}
       >
         <IvyCorner
           meshProps={{

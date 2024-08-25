@@ -5,7 +5,7 @@ import { OrbitControls } from '@react-three/drei';
 
 import { absolute, flexCenter, fullSize, padding } from './styles';
 import { useState } from 'react';
-import { StateDto } from './graph/types';
+import { StateDto, Turn, TurnDirection } from './graph/types';
 
 import { FlexColumn, FlexRow } from './components/base/Flex';
 import { Button, Classes, Colors, Tag } from '@blueprintjs/core';
@@ -69,6 +69,57 @@ const path = [
   },
 ] satisfies StateDto[];
 
+const turns: Turn[] = [
+  {
+    corner: 0,
+    turnDirection: TurnDirection.Clockwise,
+  },
+  {
+    corner: 1,
+    turnDirection: TurnDirection.Clockwise,
+  },
+  {
+    corner: 2,
+    turnDirection: TurnDirection.Clockwise,
+  },
+  {
+    corner: 3,
+    turnDirection: TurnDirection.Clockwise,
+  },
+  {
+    corner: 0,
+    turnDirection: TurnDirection.CounterClockwise,
+  },
+  {
+    corner: 1,
+    turnDirection: TurnDirection.CounterClockwise,
+  },
+  {
+    corner: 2,
+    turnDirection: TurnDirection.CounterClockwise,
+  },
+  {
+    corner: 3,
+    turnDirection: TurnDirection.CounterClockwise,
+  },
+  {
+    corner: 2,
+    turnDirection: TurnDirection.Clockwise,
+  },
+  {
+    corner: 3,
+    turnDirection: TurnDirection.Clockwise,
+  },
+  {
+    corner: 0,
+    turnDirection: TurnDirection.CounterClockwise,
+  },
+  {
+    corner: 1,
+    turnDirection: TurnDirection.CounterClockwise,
+  },
+];
+
 function App() {
   const [pathIndex, setPathIndex] = useState(0);
 
@@ -81,6 +132,8 @@ function App() {
   };
 
   const pathState = path[pathIndex];
+
+  const turn = turns[pathIndex];
 
   return (
     <div
@@ -129,7 +182,7 @@ function App() {
         <directionalLight position={[0, 0, -5]} color="white" />
         <directionalLight position={[0, 5, 0]} color="white" />
         <directionalLight position={[0, -5, 0]} color="white" />
-        <IvyCube cubeState={pathState} />
+        <IvyCube cubeState={pathState} turn={turn} />
         <OrbitControls target={[0, 0, 0]} />
       </Canvas>
     </div>
