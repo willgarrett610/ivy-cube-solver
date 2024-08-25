@@ -18,6 +18,60 @@ export const cornerAxes = {
   3: new Vector3(1, 1, -1).normalized.asTuple,
 };
 
+interface CornerData {
+  position: [number, number, number];
+  rotation: [number, number, number];
+  colors: {
+    background: string;
+    x: string;
+    y: string;
+    z: string;
+  };
+}
+
+const cornersData: CornerData[] = [
+  {
+    position: [-1, -1, -1],
+    rotation: [0, -Math.PI / 2, 0],
+    colors: {
+      background: cubeColors.internals,
+      x: cubeColors.orange,
+      y: cubeColors.blue,
+      z: cubeColors.yellow,
+    },
+  },
+  {
+    position: [-1, 1, 1],
+    rotation: [Math.PI, -Math.PI / 2, 0],
+    colors: {
+      background: cubeColors.internals,
+      x: cubeColors.orange,
+      y: cubeColors.green,
+      z: cubeColors.white,
+    },
+  },
+  {
+    position: [1, -1, 1],
+    rotation: [-Math.PI / 2, Math.PI, 0],
+    colors: {
+      background: cubeColors.internals,
+      x: cubeColors.yellow,
+      y: cubeColors.red,
+      z: cubeColors.green,
+    },
+  },
+  {
+    position: [1, 1, -1],
+    rotation: [0, Math.PI / 2, Math.PI],
+    colors: {
+      background: cubeColors.internals,
+      x: cubeColors.red,
+      y: cubeColors.blue,
+      z: cubeColors.white,
+    },
+  },
+];
+
 export interface IvyCornersProps {
   offset?: number;
   meshProps?: MeshProps;
@@ -51,90 +105,33 @@ export const IvyCorners = (props: IvyCornersProps) => {
 
   return (
     <mesh {...meshProps}>
-      <Rotate
-        angle={
-          (-corners[0] * (2 * Math.PI)) / 3 +
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          (isTurning && turn!.corner === 0 ? angle : 0)
-        }
-        axis={cornerAxes[0]}
-      >
-        <IvyCorner
-          meshProps={{
-            position: [-offset, -offset, -offset],
-            rotation: [0, -Math.PI / 2, 0],
-          }}
-          colors={{
-            background: cubeColors.internals,
-            x: cubeColors.orange,
-            y: cubeColors.blue,
-            z: cubeColors.yellow,
-          }}
-        />
-      </Rotate>
-      <Rotate
-        angle={
-          (-corners[1] * (2 * Math.PI)) / 3 +
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          (isTurning && turn!.corner === 1 ? angle : 0)
-        }
-        axis={cornerAxes[1]}
-      >
-        <IvyCorner
-          meshProps={{
-            position: [-offset, offset, offset],
-            rotation: [Math.PI, -Math.PI / 2, 0],
-          }}
-          colors={{
-            background: cubeColors.internals,
-            x: cubeColors.orange,
-            y: cubeColors.green,
-            z: cubeColors.white,
-          }}
-        />
-      </Rotate>
-      <Rotate
-        angle={
-          (-corners[2] * (2 * Math.PI)) / 3 +
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          (isTurning && turn!.corner === 2 ? angle : 0)
-        }
-        axis={cornerAxes[2]}
-      >
-        <IvyCorner
-          meshProps={{
-            position: [offset, -offset, offset],
-            rotation: [-Math.PI / 2, Math.PI, 0],
-          }}
-          colors={{
-            background: cubeColors.internals,
-            x: cubeColors.yellow,
-            y: cubeColors.red,
-            z: cubeColors.green,
-          }}
-        />
-      </Rotate>
-      <Rotate
-        angle={
-          (-corners[3] * (2 * Math.PI)) / 3 +
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          (isTurning && turn!.corner === 3 ? angle : 0)
-        }
-        axis={cornerAxes[3]}
-      >
-        <IvyCorner
-          meshProps={{
-            position: [offset, offset, -offset],
-            rotation: [0, Math.PI / 2, Math.PI],
-          }}
-          colors={{
-            background: cubeColors.internals,
-            x: cubeColors.red,
-            y: cubeColors.blue,
-            z: cubeColors.white,
-          }}
-        />
-      </Rotate>
+      {cornersData.map((cornerData, i) => {
+        const { position, rotation, colors } = cornerData;
+
+        const cornerStateRotation = (-corners[i] * (2 * Math.PI)) / 3;
+
+        return (
+          <Rotate
+            key={i}
+            angle={
+              cornerStateRotation +
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- turn is defined if isTurning is true
+              (isTurning && turn!.corner === i ? angle : 0)
+            }
+            axis={cornerAxes[i as 0 | 1 | 2 | 3]}
+          >
+            <IvyCorner
+              key={i}
+              meshProps={{
+                position: position.map((v) => v * offset) as [number, number, number],
+                rotation,
+              }}
+              // I do not know why the spread is necessary here, but it is
+              colors={{ ...colors }}
+            />
+          </Rotate>
+        );
+      })}
     </mesh>
   );
 };
