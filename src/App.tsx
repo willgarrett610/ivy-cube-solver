@@ -15,15 +15,16 @@ import * as THREE from 'three';
 import { cubeColors } from './utils';
 import { Rotate } from './components/three/Rotate';
 import { Vector3 } from './utils/math/Vector3';
-import { State } from './graph/types';
+import { State, StateDto } from './graph/types';
 
 import { FlexColumn, FlexRow } from './components/base/Flex';
-import { Button } from '@blueprintjs/core';
+import { Button, Classes, Colors, Tag } from '@blueprintjs/core';
 
 import '@blueprintjs/core/lib/css/blueprint.css';
 import { IconNames } from '@blueprintjs/icons';
 import { genGraph, getSolvePath } from './graph/gen';
-import { mod } from './utils/math';
+import { lerp, mod } from './utils/math';
+import { useScale } from './utils/react/hooks';
 
 // genGraph();
 
@@ -38,12 +39,7 @@ const Model = (props: ModelProps) => {
 
   const scene = gltf.scene.clone();
 
-  return (
-    <>
-      <primitive object={scene} scale={0.1} {...primitiveProps} />;
-      <meshStandardMaterial color={'blue'} />
-    </>
-  );
+  return <primitive object={scene} scale={0.1} {...primitiveProps} />;
 };
 
 type SubModelProps = Omit<PrimitiveProps, 'object'>;
@@ -147,7 +143,7 @@ const IvyCorner = (props: IvyCornerProps) => {
 interface IvyCornersProps {
   offset?: number;
   meshProps?: MeshProps;
-  cubeState: State;
+  cubeState: StateDto;
 }
 
 const IvyCorners = (props: IvyCornersProps) => {
@@ -232,7 +228,7 @@ const IvyCorners = (props: IvyCornersProps) => {
 interface IvyCentersProps {
   offset?: number;
   meshProps?: MeshProps;
-  cubeState: State;
+  cubeState: StateDto;
 }
 
 const centerMapping: Record<number, string> = {
@@ -294,21 +290,29 @@ const IvyCenters = (props: IvyCentersProps) => {
   );
 };
 
+function easeOutCubic(x: number): number {
+  return 1 - Math.pow(1 - x, 3);
+}
+
+const offset = 3.85;
+const fps = 30;
+
 interface IvyCubeProps {
   meshProps?: MeshProps;
-  cubeState: State;
+  cubeState: StateDto;
 }
 
 const IvyCube = (props: IvyCubeProps) => {
   const { meshProps, cubeState } = props;
 
-  const offset = 3.85;
+  const t = useScale(0, 1, fps, 2_500);
+  const v = easeOutCubic(t);
+  const usedOffset = lerp(50, offset, v);
 
   return (
     <mesh {...meshProps}>
-      {/* <IvyMainCore /> */}
-      <IvyCorners cubeState={cubeState} offset={offset} />
-      <IvyCenters cubeState={cubeState} offset={offset} />
+      <IvyCorners cubeState={cubeState} offset={usedOffset} />
+      <IvyCenters cubeState={cubeState} offset={usedOffset} />
       <mesh>
         <sphereGeometry args={[offset, 32, 32]} />
         <meshStandardMaterial color={cubeColors.internals} roughness={0.5} />
@@ -317,9 +321,57 @@ const IvyCube = (props: IvyCubeProps) => {
   );
 };
 
-const path = getSolvePath(genGraph()!);
-
-console.log(path);
+// const path = getSolvePath(genGraph()!);
+const path = [
+  {
+    corners: [2, 1, 1, 2],
+    centers: [0, 3, 2, 1, 5, 4],
+  },
+  {
+    corners: [1, 1, 1, 2],
+    centers: [5, 0, 2, 1, 3, 4],
+  },
+  {
+    corners: [1, 1, 2, 2],
+    centers: [5, 4, 0, 1, 3, 2],
+  },
+  {
+    corners: [2, 1, 2, 2],
+    centers: [4, 3, 0, 1, 5, 2],
+  },
+  {
+    corners: [2, 1, 0, 2],
+    centers: [4, 2, 3, 1, 5, 0],
+  },
+  {
+    corners: [0, 1, 0, 2],
+    centers: [2, 5, 3, 1, 4, 0],
+  },
+  {
+    corners: [1, 1, 0, 2],
+    centers: [5, 4, 3, 1, 2, 0],
+  },
+  {
+    corners: [1, 1, 0, 0],
+    centers: [1, 4, 3, 0, 2, 5],
+  },
+  {
+    corners: [1, 2, 0, 0],
+    centers: [1, 4, 0, 2, 3, 5],
+  },
+  {
+    corners: [1, 0, 0, 0],
+    centers: [1, 4, 2, 3, 0, 5],
+  },
+  {
+    corners: [2, 0, 0, 0],
+    centers: [4, 0, 2, 3, 1, 5],
+  },
+  {
+    corners: [0, 0, 0, 0],
+    centers: [0, 1, 2, 3, 4, 5],
+  },
+] satisfies StateDto[];
 
 function App() {
   const [pathIndex, setPathIndex] = useState(0);
@@ -335,27 +387,41 @@ function App() {
   const pathState = path[pathIndex];
 
   return (
-    <div css={[absolute(), fullSize, flexCenter]}>
+    <div
+      className={Classes.DARK}
+      css={[absolute(), fullSize, flexCenter, { background: Colors.BLACK }]}
+    >
       <FlexColumn css={[absolute(0, 0), padding('xl'), { zIndex: 100 }]} gap={5}>
-        {pathIndex + 1} / {path.length}
         <FlexRow gap={5}>
-          <Button onClick={decrementPathIndex} icon={IconNames.ChevronLeft}>
-            Prev
-          </Button>
-          <Button onClick={incrementPathIndex} rightIcon={IconNames.ChevronRight}>
-            Next
-          </Button>
+          <Button
+            minimal
+            disabled={pathIndex <= 0}
+            onClick={decrementPathIndex}
+            icon={IconNames.ChevronLeft}
+          />
+          <Tag large minimal css={{ width: 70, textAlign: 'center' }}>
+            {pathIndex + 1} / {path.length}
+          </Tag>
+          <Button
+            minimal
+            disabled={pathIndex >= path.length - 1}
+            onClick={incrementPathIndex}
+            rightIcon={IconNames.ChevronRight}
+          />
         </FlexRow>
       </FlexColumn>
-      <Canvas>
+      <Canvas
+        camera={{
+          position: [15, 15, 15],
+        }}
+      >
         <ambientLight />
         <directionalLight position={[0, 0, 5]} color="white" />
         <directionalLight position={[0, 0, -5]} color="white" />
         <directionalLight position={[0, 5, 0]} color="white" />
         <directionalLight position={[0, -5, 0]} color="white" />
         <IvyCube cubeState={pathState} />
-        <OrbitControls />
-        <axesHelper args={[5]} />
+        <OrbitControls target={[0, 0, 0]} />
       </Canvas>
     </div>
   );

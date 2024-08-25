@@ -33,9 +33,18 @@ export class GNode {
   }
 }
 
+export interface StateDto {
+  corners: [number, number, number, number];
+  centers: [number, number, number, number, number, number];
+}
+
 export class State {
   corners: [number, number, number, number];
   centers: [number, number, number, number, number, number];
+
+  static fromDto(dto: StateDto) {
+    return new State(dto.corners, dto.centers);
+  }
 
   constructor(
     corners: [number, number, number, number],
@@ -102,5 +111,12 @@ export class State {
       this.corners.map((v, i) => v * 10 ** i).reduce((p, c) => p + c, 0) * 10 ** 6 +
       this.centers.map((v, i) => v * 10 ** i).reduce((p, c) => p + c, 0)
     );
+  }
+
+  get dto(): StateDto {
+    return {
+      corners: this.corners,
+      centers: this.centers,
+    };
   }
 }

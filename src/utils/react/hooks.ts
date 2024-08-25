@@ -12,3 +12,19 @@ export const useIteration = (fps = 60) => {
 
   return i;
 };
+
+export const useScale = (start: number, end: number, fps = 60, durationMs: number) => {
+  const [value, setValue] = useState(start);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setValue((value) => {
+        const delta = (end - start) / (durationMs / (1000 / fps));
+        return Math.min(end, value + delta);
+      });
+    }, 1000 / fps);
+    return () => clearInterval(interval);
+  }, [fps, start, end, durationMs]);
+
+  return value;
+};
