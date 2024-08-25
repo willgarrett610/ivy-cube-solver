@@ -34,10 +34,13 @@ export class GNode {
 }
 
 export class State {
-  corners: number[];
-  centers: number[];
+  corners: [number, number, number, number];
+  centers: [number, number, number, number, number, number];
 
-  constructor(corners: number[], centers: number[]) {
+  constructor(
+    corners: [number, number, number, number],
+    centers: [number, number, number, number, number, number],
+  ) {
     this.corners = corners;
     this.centers = centers;
   }
@@ -45,8 +48,15 @@ export class State {
   static solved = () => new State([0, 0, 0, 0], [0, 1, 2, 3, 4, 5]);
 
   rotate(corner: number, clockwise: boolean): State {
-    const corners: number[] = this.corners.map((v) => v);
-    const centers: number[] = this.centers.map((v) => v);
+    const corners = this.corners.slice() as [number, number, number, number];
+    const centers = this.centers.slice() as [
+      number,
+      number,
+      number,
+      number,
+      number,
+      number,
+    ];
 
     corners[corner] = (this.corners[corner] + (clockwise ? 1 : 2)) % 3;
 
