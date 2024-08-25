@@ -8,19 +8,19 @@ import { easeOutCubic, lerp } from '../../utils/math';
 import { useScale } from '../../utils/react/hooks';
 import { IvyCorners } from './IvyCorners';
 import { IvyCenters } from './IvyCenters';
-import { useEffect } from 'react';
 
 const offset = 3.85;
 const fps = 30;
 
 export interface IvyCubeProps {
   meshProps?: MeshProps;
+  prevCubeState?: StateDto;
   cubeState: StateDto;
   turn?: Turn;
 }
 
 export const IvyCube = (props: IvyCubeProps) => {
-  const { meshProps, cubeState, turn } = props;
+  const { meshProps, prevCubeState, cubeState, turn } = props;
 
   const { value: t } = useScale(0, 1, fps, 2_500);
   const v = easeOutCubic(t);
@@ -28,8 +28,18 @@ export const IvyCube = (props: IvyCubeProps) => {
 
   return (
     <mesh {...meshProps}>
-      <IvyCorners cubeState={cubeState} offset={usedOffset} turn={turn} />
-      <IvyCenters cubeState={cubeState} offset={usedOffset} turn={turn} />
+      <IvyCorners
+        prevCubeState={prevCubeState}
+        cubeState={cubeState}
+        offset={usedOffset}
+        turn={turn}
+      />
+      <IvyCenters
+        prevCubeState={prevCubeState}
+        cubeState={cubeState}
+        offset={usedOffset}
+        turn={turn}
+      />
       <mesh>
         <sphereGeometry args={[offset, 32, 32]} />
         <meshStandardMaterial color={cubeColors.internals} roughness={0.5} />

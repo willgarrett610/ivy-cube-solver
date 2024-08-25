@@ -4,15 +4,17 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 
 import { absolute, flexCenter, fullSize, padding } from './styles';
-import { useState } from 'react';
-import { StateDto, Turn, TurnDirection } from './graph/types';
+import { useEffect, useMemo, useState } from 'react';
+import { StateDto } from './graph/types';
 
 import { FlexColumn, FlexRow } from './components/base/Flex';
 import { Button, Classes, Colors, Tag } from '@blueprintjs/core';
-
 import { IconNames } from '@blueprintjs/icons';
+
 import { mod } from './utils/math';
 import { IvyCube } from './components/ivy-cube/IvyCube';
+
+import { getTurnFromStateChange } from './graph/util';
 
 import './App.css';
 import '@blueprintjs/core/lib/css/blueprint.css';
@@ -69,71 +71,32 @@ const path = [
   },
 ] satisfies StateDto[];
 
-const turns: Turn[] = [
-  {
-    corner: 0,
-    turnDirection: TurnDirection.Clockwise,
-  },
-  {
-    corner: 1,
-    turnDirection: TurnDirection.Clockwise,
-  },
-  {
-    corner: 2,
-    turnDirection: TurnDirection.Clockwise,
-  },
-  {
-    corner: 3,
-    turnDirection: TurnDirection.Clockwise,
-  },
-  {
-    corner: 0,
-    turnDirection: TurnDirection.CounterClockwise,
-  },
-  {
-    corner: 1,
-    turnDirection: TurnDirection.CounterClockwise,
-  },
-  {
-    corner: 2,
-    turnDirection: TurnDirection.CounterClockwise,
-  },
-  {
-    corner: 3,
-    turnDirection: TurnDirection.CounterClockwise,
-  },
-  {
-    corner: 2,
-    turnDirection: TurnDirection.Clockwise,
-  },
-  {
-    corner: 3,
-    turnDirection: TurnDirection.Clockwise,
-  },
-  {
-    corner: 0,
-    turnDirection: TurnDirection.CounterClockwise,
-  },
-  {
-    corner: 1,
-    turnDirection: TurnDirection.CounterClockwise,
-  },
-];
+export const animationTimeMs = 2_500;
 
 function App() {
+  const [prevPathIndex, setPrevPathIndex] = useState<number | null>(null);
   const [pathIndex, setPathIndex] = useState(0);
 
   const incrementPathIndex = () => {
+    setPrevPathIndex(pathIndex);
     setPathIndex((prev) => mod(prev + 1, path.length));
   };
 
   const decrementPathIndex = () => {
+    setPrevPathIndex(pathIndex);
     setPathIndex((prev) => mod(prev - 1, path.length));
   };
 
+  const prevPathState = prevPathIndex !== null ? path[prevPathIndex] : undefined;
   const pathState = path[pathIndex];
 
-  const turn = turns[pathIndex];
+  const turn = useMemo(
+    () =>
+      prevPathState !== undefined
+        ? getTurnFromStateChange(prevPathState, pathState)
+        : undefined,
+    [prevPathState, pathState],
+  );
 
   return (
     <div
@@ -182,7 +145,7 @@ function App() {
         <directionalLight position={[0, 0, -5]} color="white" />
         <directionalLight position={[0, 5, 0]} color="white" />
         <directionalLight position={[0, -5, 0]} color="white" />
-        <IvyCube cubeState={pathState} turn={turn} />
+        <IvyCube prevCubeState={prevPathState} cubeState={pathState} turn={turn} />
         <OrbitControls target={[0, 0, 0]} />
       </Canvas>
     </div>

@@ -7,7 +7,7 @@ import { IvyCorner } from './IvyCorner';
 import { useScale } from '../../utils/react/hooks';
 import { easeInOutCubic } from '../../utils/math';
 import { lerp } from 'three/src/math/MathUtils';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 const fps = 30;
 
@@ -21,16 +21,20 @@ export const cornerAxes = {
 export interface IvyCornersProps {
   offset?: number;
   meshProps?: MeshProps;
+  prevCubeState?: StateDto;
   cubeState: StateDto;
   turn?: Turn;
 }
 
 export const IvyCorners = (props: IvyCornersProps) => {
-  const { turn, offset = 0, meshProps, cubeState } = props;
+  const { turn, offset = 0, meshProps, prevCubeState, cubeState } = props;
 
   const { value: t, reset, isPlaying } = useScale(0, 1, fps, 2_500);
-  const v = easeInOutCubic(t);
-  const angle = lerp(0, (2 * Math.PI) / 3, v);
+  const v = useMemo(() => easeInOutCubic(t), [t]);
+  const angle = useMemo(
+    () => (turn ? lerp(0, -((2 * Math.PI) / 3) * turn.turnDirection, v) : 0),
+    [turn, v],
+  );
 
   useEffect(() => {
     if (turn) {
@@ -38,15 +42,20 @@ export const IvyCorners = (props: IvyCornersProps) => {
     }
   }, [turn, reset]);
 
-  const isTurning = turn && isPlaying && t < 1;
+  const isTurning = useMemo(() => turn && isPlaying && t < 1, [turn, isPlaying, t]);
 
-  const { corners } = cubeState;
+  const { corners } = useMemo(
+    () => (isPlaying ? prevCubeState : cubeState) ?? cubeState,
+    [isPlaying, prevCubeState, cubeState],
+  );
 
   return (
     <mesh {...meshProps}>
       <Rotate
         angle={
-          (-corners[0] * (2 * Math.PI)) / 3 + (isTurning && turn.corner === 0 ? angle : 0)
+          (-corners[0] * (2 * Math.PI)) / 3 +
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          (isTurning && turn!.corner === 0 ? angle : 0)
         }
         axis={cornerAxes[0]}
       >
@@ -65,7 +74,9 @@ export const IvyCorners = (props: IvyCornersProps) => {
       </Rotate>
       <Rotate
         angle={
-          (-corners[1] * (2 * Math.PI)) / 3 + (isTurning && turn.corner === 1 ? angle : 0)
+          (-corners[1] * (2 * Math.PI)) / 3 +
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          (isTurning && turn!.corner === 1 ? angle : 0)
         }
         axis={cornerAxes[1]}
       >
@@ -84,7 +95,9 @@ export const IvyCorners = (props: IvyCornersProps) => {
       </Rotate>
       <Rotate
         angle={
-          (-corners[2] * (2 * Math.PI)) / 3 + (isTurning && turn.corner === 2 ? angle : 0)
+          (-corners[2] * (2 * Math.PI)) / 3 +
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          (isTurning && turn!.corner === 2 ? angle : 0)
         }
         axis={cornerAxes[2]}
       >
@@ -103,7 +116,9 @@ export const IvyCorners = (props: IvyCornersProps) => {
       </Rotate>
       <Rotate
         angle={
-          (-corners[3] * (2 * Math.PI)) / 3 + (isTurning && turn.corner === 3 ? angle : 0)
+          (-corners[3] * (2 * Math.PI)) / 3 +
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          (isTurning && turn!.corner === 3 ? angle : 0)
         }
         axis={cornerAxes[3]}
       >

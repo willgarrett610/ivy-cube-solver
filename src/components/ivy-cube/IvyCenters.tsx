@@ -4,7 +4,7 @@ import { cubeColors } from '../../utils';
 import { IvyCenter } from './IvyCenter';
 import { useScale } from '../../utils/react/hooks';
 import { easeInOutCubic, lerp } from '../../utils/math';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Rotate } from '../three/Rotate';
 import { cornerAxes } from './IvyCorners';
 
@@ -29,31 +29,43 @@ const fps = 30;
 export interface IvyCentersProps {
   offset?: number;
   meshProps?: MeshProps;
+  prevCubeState?: StateDto;
   cubeState: StateDto;
   turn?: Turn;
 }
 
 export const IvyCenters = (props: IvyCentersProps) => {
-  const { turn, offset = 0, meshProps, cubeState } = props;
+  const { turn, offset = 0, meshProps, prevCubeState, cubeState } = props;
 
   const { value: t, reset, isPlaying } = useScale(0, 1, fps, 2_500);
-  const v = easeInOutCubic(t);
-  const angle = lerp(0, (2 * Math.PI) / 3, v);
+  const v = useMemo(() => easeInOutCubic(t), [t]);
+  const angle = useMemo(
+    () => (turn ? lerp(0, -((2 * Math.PI) / 3) * turn.turnDirection, v) : 0),
+    [turn, v],
+  );
 
   useEffect(() => {
     if (turn) {
+      console.log('resetting');
       reset();
     }
   }, [turn, reset]);
 
-  const isTurning = turn && isPlaying && t < 1;
+  const isTurning = useMemo(() => turn && isPlaying && t < 1, [turn, isPlaying, t]);
 
-  const turningCenters = turn ? cornerToCenterMapping[turn.corner] : [];
-  const turningAxis = turn
-    ? cornerAxes[turn.corner]
-    : ([0, 0, 0] as [number, number, number]);
+  const turningCenters = useMemo(
+    () => (turn ? cornerToCenterMapping[turn.corner] : []),
+    [turn],
+  );
+  const turningAxis = useMemo(
+    () => (turn ? cornerAxes[turn.corner] : ([0, 0, 0] as [number, number, number])),
+    [turn],
+  );
 
-  const { centers } = cubeState;
+  const { centers } = useMemo(
+    () => (isPlaying ? prevCubeState : cubeState) ?? cubeState,
+    [isPlaying, prevCubeState, cubeState],
+  );
 
   return (
     <mesh {...meshProps}>
