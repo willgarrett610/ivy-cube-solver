@@ -57,22 +57,20 @@ const Model = (props: ModelProps) => {
   const { url, primitiveProps } = props;
   const gltf = useLoader(GLTFLoader, url);
 
-  // Object.values(gltf.nodes).forEach((node) => {
-  //   if (node.material) {
-  //     node.material = new MeshBasicMaterial({ color: new THREE.Color(getRandomColor()) });
-  //   }
-  // });
+  const scene = gltf.scene.clone();
 
-  // console.log(gltf.materials);
-  Object.values(gltf.materials).forEach((material) => {
-    const meshMaterial = material as MeshBasicMaterial;
-
-    meshMaterial.color = new THREE.Color('#520B3E');
+  scene.traverse((child) => {
+    if (child instanceof THREE.Mesh) {
+      child.material = new THREE.MeshStandardMaterial({
+        color: new THREE.Color(getRandomColor()),
+        roughness: 0.5,
+      });
+    }
   });
 
   return (
     <>
-      <primitive object={gltf.scene.clone()} scale={0.1} {...primitiveProps} />;
+      <primitive object={scene} scale={0.1} {...primitiveProps} />;
       <meshStandardMaterial color={'blue'} />
     </>
   );
