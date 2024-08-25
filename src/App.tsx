@@ -1,14 +1,5 @@
 /* eslint-disable react/no-unknown-property */
-/* eslint-disable @typescript-eslint/no-empty-interface */
 import { Canvas, MeshProps, PrimitiveProps, useLoader } from '@react-three/fiber';
-
-// import ivyCoreGltf from '../assets/gltf/ivy_core.gltf?url';
-
-// import ivyCornerStubLeftGltf from '../assets/gltf/ivy_corner_stub_x4_l.gltf?url';
-// import ivyCornerStubRightGltf from '../assets/gltf/ivy_corner_stub_x4_r.gltf?url';
-
-// import ivyInnerLeftGltf from '../assets/gltf/ivy_inner_x4_l.gltf?url';
-// import ivyInnerRightGltf from '../assets/gltf/ivy_inner_x4_r.gltf?url';
 
 import ivyCenterGltf from '../assets/gltf/center.gltf?url';
 import ivyCornerGltf from '../assets/gltf/corner.gltf?url';
@@ -19,54 +10,23 @@ import { OrbitControls } from '@react-three/drei';
 import './App.css';
 
 import { absolute, flexCenter, fullSize } from './styles';
-import { useEffect, useState } from 'react';
-import { MeshBasicMaterial } from 'three';
+import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
-
-const useIteration = (fps = 60) => {
-  const [i, setI] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setI((i) => i + 1);
-    }, 1000 / fps);
-    return () => clearInterval(interval);
-  }, [fps]);
-
-  return i;
-};
+import { cubeColors } from './utils';
+import { useIteration } from './utils/react/hooks';
+import { Rotate } from './components/three/Rotate';
+import { Vector3 } from './utils/math/Vector3';
 
 interface ModelProps {
   url: string;
   primitiveProps?: Omit<PrimitiveProps, 'object'>;
 }
 
-const colors = [
-  '#FF0000',
-  '#FF7F00',
-  '#FFFF00',
-  '#00FF00',
-  '#0000FF',
-  '#4B0082',
-  '#9400D3',
-];
-
-const getRandomColor = () => colors[Math.floor(Math.random() * colors.length)];
-
 const Model = (props: ModelProps) => {
   const { url, primitiveProps } = props;
   const gltf = useLoader(GLTFLoader, url);
 
   const scene = gltf.scene.clone();
-
-  scene.traverse((child) => {
-    if (child instanceof THREE.Mesh) {
-      child.material = new THREE.MeshStandardMaterial({
-        color: new THREE.Color(getRandomColor()),
-        roughness: 0.5,
-      });
-    }
-  });
 
   return (
     <>
@@ -76,27 +36,7 @@ const Model = (props: ModelProps) => {
   );
 };
 
-interface SubModelProps extends Omit<PrimitiveProps, 'object'> {}
-
-// const IvyCore = (props: SubModelProps) => {
-//   return <Model url={ivyCoreGltf} primitiveProps={props} />;
-// };
-
-// const IvyCornerStubLeft = (props: SubModelProps) => {
-//   return <Model url={ivyCornerStubLeftGltf} primitiveProps={props} />;
-// };
-
-// const IvyCornerStubRight = (props: SubModelProps) => {
-//   return <Model url={ivyCornerStubRightGltf} primitiveProps={props} />;
-// };
-
-// const IvyInnerLeft = (props: SubModelProps) => {
-//   return <Model url={ivyInnerLeftGltf} primitiveProps={props} />;
-// };
-
-// const IvyInnerRight = (props: SubModelProps) => {
-//   return <Model url={ivyInnerRightGltf} primitiveProps={props} />;
-// };
+type SubModelProps = Omit<PrimitiveProps, 'object'>;
 
 const IvyCenterModel = (props: SubModelProps) => {
   return <Model url={ivyCenterGltf} primitiveProps={props} />;
@@ -106,52 +46,154 @@ const IvyCornerModel = (props: SubModelProps) => {
   return <Model url={ivyCornerGltf} primitiveProps={props} />;
 };
 
-const IvyCenter = (props: MeshProps) => {
+interface IvyCenterProps {
+  meshProps: MeshProps;
+  colors: { background: THREE.ColorRepresentation; face: THREE.ColorRepresentation };
+}
+
+const IvyCenter = (props: IvyCenterProps) => {
+  const { colors, meshProps } = props;
+
+  const meshRef = useRef<THREE.Mesh>(null);
+
+  const materialMapping: Record<
+    keyof IvyCenterProps['colors'],
+    (mesh: THREE.Mesh) => THREE.Mesh
+  > = {
+    background: (mesh: THREE.Mesh) =>
+      mesh.children[0].children[0].children[0].children[0] as THREE.Mesh,
+    face: (mesh: THREE.Mesh) =>
+      mesh.children[0].children[0].children[0].children[1] as THREE.Mesh,
+  };
+
+  useEffect(() => {
+    const mesh = meshRef.current;
+
+    if (mesh) {
+      Object.entries(colors).forEach(([key, color]) => {
+        materialMapping[key as keyof IvyCenterProps['colors']](mesh).material =
+          new THREE.MeshStandardMaterial({
+            color: new THREE.Color(color),
+            roughness: 0.5,
+          });
+      });
+    }
+  }, [colors]);
+
   return (
-    <mesh {...props}>
+    <mesh ref={meshRef} {...meshProps}>
       <IvyCenterModel />
     </mesh>
   );
 };
 
-const IvyCorner = (props: SubModelProps) => {
+interface IvyCornerProps {
+  meshProps: MeshProps;
+  colors: {
+    background: THREE.ColorRepresentation;
+    x: THREE.ColorRepresentation;
+    y: THREE.ColorRepresentation;
+    z: THREE.ColorRepresentation;
+  };
+}
+
+const IvyCorner = (props: IvyCornerProps) => {
+  const { colors, meshProps } = props;
+
+  const meshRef = useRef<THREE.Mesh>(null);
+
+  const materialMapping: Record<
+    keyof IvyCornerProps['colors'],
+    (mesh: THREE.Mesh) => THREE.Mesh
+  > = {
+    background: (mesh: THREE.Mesh) =>
+      mesh.children[0].children[0].children[0] as THREE.Mesh,
+    x: (mesh: THREE.Mesh) => mesh.children[0].children[0].children[1] as THREE.Mesh,
+    y: (mesh: THREE.Mesh) => mesh.children[0].children[0].children[2] as THREE.Mesh,
+    z: (mesh: THREE.Mesh) => mesh.children[0].children[0].children[3] as THREE.Mesh,
+  };
+
+  useEffect(() => {
+    const mesh = meshRef.current;
+
+    if (mesh) {
+      Object.entries(colors).forEach(([key, color]) => {
+        materialMapping[key as keyof IvyCornerProps['colors']](mesh).material =
+          new THREE.MeshStandardMaterial({
+            color: new THREE.Color(color),
+            roughness: 0.5,
+          });
+      });
+    }
+  }, [colors]);
+
   return (
-    <mesh {...props}>
+    <mesh ref={meshRef} {...meshProps}>
       <IvyCornerModel />
     </mesh>
   );
 };
-
-// const IvyMainCore = (props: MeshProps) => {
-//   return (
-//     <mesh {...props}>
-//       <IvyCore position={[0, 0, 3]} />
-//       <IvyCore position={[0, 0, -3]} rotation={[0, Math.PI, 0]} />
-//     </mesh>
-//   );
-// };
 
 interface IvyCornersProps extends MeshProps {
   offset?: number;
 }
 
 const IvyCorners = (props: IvyCornersProps) => {
+  const i = useIteration(60);
+
   const { offset = 5, ...rest } = props;
 
   return (
     <mesh {...rest}>
-      <IvyCorner position={[-offset, -offset, -offset]} rotation={[0, -Math.PI / 2, 0]} />
+      <Rotate angle={i / 50} axis={new Vector3(-1, -1, -1).normalized.asTuple}>
+        <IvyCorner
+          meshProps={{
+            position: [-offset, -offset, -offset],
+            rotation: [0, -Math.PI / 2, 0],
+          }}
+          colors={{
+            background: cubeColors.internals,
+            x: cubeColors.orange,
+            y: cubeColors.blue,
+            z: cubeColors.yellow,
+          }}
+        />
+      </Rotate>
       <IvyCorner
-        position={[offset, offset, -offset]}
-        rotation={[0, Math.PI / 2, Math.PI]}
+        meshProps={{
+          position: [offset, offset, -offset],
+          rotation: [0, Math.PI / 2, Math.PI],
+        }}
+        colors={{
+          background: cubeColors.internals,
+          x: cubeColors.red,
+          y: cubeColors.blue,
+          z: cubeColors.white,
+        }}
       />
       <IvyCorner
-        position={[offset, -offset, offset]}
-        rotation={[-Math.PI / 2, Math.PI, 0]}
+        meshProps={{
+          position: [offset, -offset, offset],
+          rotation: [-Math.PI / 2, Math.PI, 0],
+        }}
+        colors={{
+          background: cubeColors.internals,
+          x: cubeColors.yellow,
+          y: cubeColors.red,
+          z: cubeColors.green,
+        }}
       />
       <IvyCorner
-        position={[-offset, offset, offset]}
-        rotation={[Math.PI, -Math.PI / 2, 0]}
+        meshProps={{
+          position: [-offset, offset, offset],
+          rotation: [Math.PI, -Math.PI / 2, 0],
+        }}
+        colors={{
+          background: cubeColors.internals,
+          x: cubeColors.orange,
+          y: cubeColors.green,
+          z: cubeColors.white,
+        }}
       />
     </mesh>
   );
@@ -166,24 +208,61 @@ const IvyCenters = (props: IvyCentersProps) => {
 
   return (
     <mesh {...rest}>
-      <IvyCenter position={[-offset, 0, 0]} rotation={[0, 0, Math.PI]} />
-      <IvyCenter position={[offset, 0, 0]} />
-      <IvyCenter position={[0, 0, offset]} rotation={[Math.PI / 2, 0, Math.PI / 2]} />
-      <IvyCenter position={[0, 0, -offset]} rotation={[-Math.PI / 2, 0, Math.PI / 2]} />
-      <IvyCenter position={[0, offset, 0]} rotation={[Math.PI / 2, Math.PI / 2, 0]} />
-      <IvyCenter position={[0, -offset, 0]} rotation={[-Math.PI / 2, Math.PI / 2, 0]} />
+      <IvyCenter
+        meshProps={{
+          position: [-offset, 0, 0],
+          rotation: [0, 0, Math.PI],
+        }}
+        colors={{ background: cubeColors.internals, face: cubeColors.orange }}
+      />
+      <IvyCenter
+        meshProps={{ position: [offset, 0, 0] }}
+        colors={{ background: cubeColors.internals, face: cubeColors.red }}
+      />
+      <IvyCenter
+        meshProps={{
+          position: [0, 0, offset],
+          rotation: [Math.PI / 2, 0, Math.PI / 2],
+        }}
+        colors={{ background: cubeColors.internals, face: cubeColors.green }}
+      />
+      <IvyCenter
+        meshProps={{
+          position: [0, 0, -offset],
+          rotation: [-Math.PI / 2, 0, Math.PI / 2],
+        }}
+        colors={{ background: cubeColors.internals, face: cubeColors.blue }}
+      />
+      <IvyCenter
+        meshProps={{
+          position: [0, offset, 0],
+          rotation: [Math.PI / 2, Math.PI / 2, 0],
+        }}
+        colors={{ background: cubeColors.internals, face: cubeColors.white }}
+      />
+      <IvyCenter
+        meshProps={{
+          position: [0, -offset, 0],
+          rotation: [-Math.PI / 2, Math.PI / 2, 0],
+        }}
+        colors={{ background: cubeColors.internals, face: cubeColors.yellow }}
+      />
     </mesh>
   );
 };
 
 const IvyCube = (props: MeshProps) => {
-  const offset = 4;
+  const offset = 3.85;
 
   return (
     <mesh {...props}>
       {/* <IvyMainCore /> */}
       <IvyCorners offset={offset} />
       <IvyCenters offset={offset} />
+      <mesh>
+        <sphereGeometry args={[offset, 32, 32]} />
+        <meshStandardMaterial color={cubeColors.internals} roughness={0.5} />
+      </mesh>
     </mesh>
   );
 };
@@ -200,12 +279,6 @@ function App() {
         <IvyCube />
         <OrbitControls />
         <axesHelper args={[5]} />
-
-        <mesh>
-          {/* basic cube */}
-          <sphereGeometry args={[4, 32, 32]} />
-          <meshBasicMaterial color="#000000" opacity={0.1} />
-        </mesh>
       </Canvas>
     </div>
   );
