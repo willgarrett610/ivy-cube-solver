@@ -1,14 +1,39 @@
-class GNode {
+export class Edge {
+  corner: number;
+  clockwise: boolean;
+  node: GNode;
+
+  constructor(corner: number, clockwise: boolean, node: GNode) {
+    this.corner = corner;
+    this.clockwise = clockwise;
+    this.node = node;
+  }
+}
+
+export class GNode {
   state: State;
-  neighbors: GNode[];
+  neighbors: Edge[];
+  distance: number;
+  solvePathState?: State;
 
   constructor(state: State) {
     this.state = state;
     this.neighbors = [];
+    this.distance = 0;
+    this.solvePathState = undefined;
+  }
+
+  getBackEdge(state: State) {
+    return this.neighbors.findIndex((edge) => edge.node.state.id === state.id);
+  }
+
+  get solvedPath() {
+    if (this.solvePathState) return this.getBackEdge(this.solvePathState);
+    return undefined;
   }
 }
 
-class State {
+export class State {
   corners: number[];
   centers: number[];
 
@@ -54,11 +79,18 @@ class State {
     return new State(corners, centers);
   }
 
-  findOrCreate(visited: Map<State, GNode>) {
-    if (visited.has(this)) {
-      return visited.get(this) as GNode;
+  findOrCreate(visited: Map<number, GNode>) {
+    if (visited.has(this.id)) {
+      return visited.get(this.id) as GNode;
     }
 
     return new GNode(this);
+  }
+
+  get id() {
+    return (
+      this.corners.map((v, i) => v * 10 ** i).reduce((p, c) => p + c, 0) * 10 ** 6 +
+      this.centers.map((v, i) => v * 10 ** i).reduce((p, c) => p + c, 0)
+    );
   }
 }
