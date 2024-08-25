@@ -66,7 +66,7 @@ export class State {
         swaps = [0, 4, 1];
         break;
       case 1:
-        swaps = [4, 2, 3];
+        swaps = [4, 3, 2];
         break;
       case 2:
         swaps = [1, 2, 5];

@@ -1,7 +1,7 @@
 import { Queue } from 'queue-typescript';
 import { Edge, GNode, State } from './types';
 
-export default function genGraph() {
+export function genGraph() {
   const visitedNodes = new Map<number, GNode>();
 
   const solvedState = State.solved();
@@ -37,7 +37,7 @@ export default function genGraph() {
     next = exploreQ.dequeue();
   }
 
-  return solvedNode;
+  return maxNode;
 }
 
 function makeEdge(
@@ -67,7 +67,7 @@ function getNeighbors(node: GNode, visitedNodes: Map<number, GNode>) {
   return neighbors;
 }
 
-function getSolvePath(node: GNode) {
+export function getSolvePath(node: GNode) {
   const states: State[] = [];
 
   while (node.distance > 0) {

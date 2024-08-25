@@ -9,13 +9,23 @@ import { OrbitControls } from '@react-three/drei';
 
 import './App.css';
 
-import { absolute, flexCenter, fullSize } from './styles';
-import { useEffect, useRef } from 'react';
+import { absolute, flexCenter, fullSize, padding } from './styles';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { cubeColors } from './utils';
-import { useIteration } from './utils/react/hooks';
 import { Rotate } from './components/three/Rotate';
 import { Vector3 } from './utils/math/Vector3';
+import { State } from './graph/types';
+
+import { FlexColumn, FlexRow } from './components/base/Flex';
+import { Button } from '@blueprintjs/core';
+
+import '@blueprintjs/core/lib/css/blueprint.css';
+import { IconNames } from '@blueprintjs/icons';
+import { genGraph, getSolvePath } from './graph/gen';
+import { mod } from './utils/math';
+
+// genGraph();
 
 interface ModelProps {
   url: string;
@@ -134,18 +144,23 @@ const IvyCorner = (props: IvyCornerProps) => {
   );
 };
 
-interface IvyCornersProps extends MeshProps {
+interface IvyCornersProps {
   offset?: number;
+  meshProps?: MeshProps;
+  cubeState: State;
 }
 
 const IvyCorners = (props: IvyCornersProps) => {
-  const i = useIteration(60);
+  const { offset = 0, meshProps, cubeState } = props;
 
-  const { offset = 5, ...rest } = props;
+  const { corners } = cubeState;
 
   return (
-    <mesh {...rest}>
-      <Rotate angle={i / 50} axis={new Vector3(-1, -1, -1).normalized.asTuple}>
+    <mesh {...meshProps}>
+      <Rotate
+        angle={(-corners[0] * (2 * Math.PI)) / 3}
+        axis={new Vector3(-1, -1, -1).normalized.asTuple}
+      >
         <IvyCorner
           meshProps={{
             position: [-offset, -offset, -offset],
@@ -159,106 +174,141 @@ const IvyCorners = (props: IvyCornersProps) => {
           }}
         />
       </Rotate>
-      <IvyCorner
-        meshProps={{
-          position: [offset, offset, -offset],
-          rotation: [0, Math.PI / 2, Math.PI],
-        }}
-        colors={{
-          background: cubeColors.internals,
-          x: cubeColors.red,
-          y: cubeColors.blue,
-          z: cubeColors.white,
-        }}
-      />
-      <IvyCorner
-        meshProps={{
-          position: [offset, -offset, offset],
-          rotation: [-Math.PI / 2, Math.PI, 0],
-        }}
-        colors={{
-          background: cubeColors.internals,
-          x: cubeColors.yellow,
-          y: cubeColors.red,
-          z: cubeColors.green,
-        }}
-      />
-      <IvyCorner
-        meshProps={{
-          position: [-offset, offset, offset],
-          rotation: [Math.PI, -Math.PI / 2, 0],
-        }}
-        colors={{
-          background: cubeColors.internals,
-          x: cubeColors.orange,
-          y: cubeColors.green,
-          z: cubeColors.white,
-        }}
-      />
+      <Rotate
+        angle={(-corners[1] * (2 * Math.PI)) / 3}
+        axis={new Vector3(-1, 1, 1).normalized.asTuple}
+      >
+        <IvyCorner
+          meshProps={{
+            position: [-offset, offset, offset],
+            rotation: [Math.PI, -Math.PI / 2, 0],
+          }}
+          colors={{
+            background: cubeColors.internals,
+            x: cubeColors.orange,
+            y: cubeColors.green,
+            z: cubeColors.white,
+          }}
+        />
+      </Rotate>
+      <Rotate
+        angle={(-corners[2] * (2 * Math.PI)) / 3}
+        axis={new Vector3(1, -1, 1).normalized.asTuple}
+      >
+        <IvyCorner
+          meshProps={{
+            position: [offset, -offset, offset],
+            rotation: [-Math.PI / 2, Math.PI, 0],
+          }}
+          colors={{
+            background: cubeColors.internals,
+            x: cubeColors.yellow,
+            y: cubeColors.red,
+            z: cubeColors.green,
+          }}
+        />
+      </Rotate>
+      <Rotate
+        angle={(-corners[3] * (2 * Math.PI)) / 3}
+        axis={new Vector3(1, 1, -1).normalized.asTuple}
+      >
+        <IvyCorner
+          meshProps={{
+            position: [offset, offset, -offset],
+            rotation: [0, Math.PI / 2, Math.PI],
+          }}
+          colors={{
+            background: cubeColors.internals,
+            x: cubeColors.red,
+            y: cubeColors.blue,
+            z: cubeColors.white,
+          }}
+        />
+      </Rotate>
     </mesh>
   );
 };
 
-interface IvyCentersProps extends MeshProps {
+interface IvyCentersProps {
   offset?: number;
+  meshProps?: MeshProps;
+  cubeState: State;
 }
 
+const centerMapping: Record<number, string> = {
+  0: cubeColors.blue,
+  1: cubeColors.yellow,
+  2: cubeColors.green,
+  3: cubeColors.white,
+  4: cubeColors.orange,
+  5: cubeColors.red,
+};
+
 const IvyCenters = (props: IvyCentersProps) => {
-  const { offset = 5, ...rest } = props;
+  const { offset = 0, meshProps, cubeState } = props;
+
+  const { centers } = cubeState;
 
   return (
-    <mesh {...rest}>
-      <IvyCenter
-        meshProps={{
-          position: [-offset, 0, 0],
-          rotation: [0, 0, Math.PI],
-        }}
-        colors={{ background: cubeColors.internals, face: cubeColors.orange }}
-      />
-      <IvyCenter
-        meshProps={{ position: [offset, 0, 0] }}
-        colors={{ background: cubeColors.internals, face: cubeColors.red }}
-      />
-      <IvyCenter
-        meshProps={{
-          position: [0, 0, offset],
-          rotation: [Math.PI / 2, 0, Math.PI / 2],
-        }}
-        colors={{ background: cubeColors.internals, face: cubeColors.green }}
-      />
+    <mesh {...meshProps}>
       <IvyCenter
         meshProps={{
           position: [0, 0, -offset],
           rotation: [-Math.PI / 2, 0, Math.PI / 2],
         }}
-        colors={{ background: cubeColors.internals, face: cubeColors.blue }}
-      />
-      <IvyCenter
-        meshProps={{
-          position: [0, offset, 0],
-          rotation: [Math.PI / 2, Math.PI / 2, 0],
-        }}
-        colors={{ background: cubeColors.internals, face: cubeColors.white }}
+        colors={{ background: cubeColors.internals, face: centerMapping[centers[0]] }}
       />
       <IvyCenter
         meshProps={{
           position: [0, -offset, 0],
           rotation: [-Math.PI / 2, Math.PI / 2, 0],
         }}
-        colors={{ background: cubeColors.internals, face: cubeColors.yellow }}
+        colors={{ background: cubeColors.internals, face: centerMapping[centers[1]] }}
+      />
+      <IvyCenter
+        meshProps={{
+          position: [0, 0, offset],
+          rotation: [Math.PI / 2, 0, Math.PI / 2],
+        }}
+        colors={{ background: cubeColors.internals, face: centerMapping[centers[2]] }}
+      />
+      <IvyCenter
+        meshProps={{
+          position: [0, offset, 0],
+          rotation: [Math.PI / 2, Math.PI / 2, 0],
+        }}
+        colors={{ background: cubeColors.internals, face: centerMapping[centers[3]] }}
+      />
+      <IvyCenter
+        meshProps={{
+          position: [-offset, 0, 0],
+          rotation: [0, 0, Math.PI],
+        }}
+        colors={{ background: cubeColors.internals, face: centerMapping[centers[4]] }}
+      />
+      <IvyCenter
+        meshProps={{ position: [offset, 0, 0] }}
+        colors={{ background: cubeColors.internals, face: centerMapping[centers[5]] }}
       />
     </mesh>
   );
 };
 
-const IvyCube = (props: MeshProps) => {
+interface IvyCubeProps {
+  meshProps?: MeshProps;
+  cubeState: State;
+}
+
+const IvyCube = (props: IvyCubeProps) => {
+  const { meshProps, cubeState } = props;
+
   const offset = 3.85;
 
   return (
-    <mesh {...props}>
+    <mesh {...meshProps}>
       {/* <IvyMainCore /> */}
-      <IvyCorners offset={offset} />
-      <IvyCenters offset={offset} />
+      <IvyCorners cubeState={cubeState} offset={offset} />
+      <IvyCenters cubeState={cubeState} offset={offset} />
       <mesh>
         <sphereGeometry args={[offset, 32, 32]} />
         <meshStandardMaterial color={cubeColors.internals} roughness={0.5} />
@@ -267,16 +317,43 @@ const IvyCube = (props: MeshProps) => {
   );
 };
 
+const path = getSolvePath(genGraph()!);
+
+console.log(path);
+
 function App() {
+  const [pathIndex, setPathIndex] = useState(0);
+
+  const incrementPathIndex = () => {
+    setPathIndex((prev) => mod(prev + 1, path.length));
+  };
+
+  const decrementPathIndex = () => {
+    setPathIndex((prev) => mod(prev - 1, path.length));
+  };
+
+  const pathState = path[pathIndex];
+
   return (
     <div css={[absolute(), fullSize, flexCenter]}>
+      <FlexColumn css={[absolute(0, 0), padding('xl'), { zIndex: 100 }]} gap={5}>
+        {pathIndex + 1} / {path.length}
+        <FlexRow gap={5}>
+          <Button onClick={decrementPathIndex} icon={IconNames.ChevronLeft}>
+            Prev
+          </Button>
+          <Button onClick={incrementPathIndex} rightIcon={IconNames.ChevronRight}>
+            Next
+          </Button>
+        </FlexRow>
+      </FlexColumn>
       <Canvas>
         <ambientLight />
         <directionalLight position={[0, 0, 5]} color="white" />
         <directionalLight position={[0, 0, -5]} color="white" />
         <directionalLight position={[0, 5, 0]} color="white" />
         <directionalLight position={[0, -5, 0]} color="white" />
-        <IvyCube />
+        <IvyCube cubeState={pathState} />
         <OrbitControls />
         <axesHelper args={[5]} />
       </Canvas>
