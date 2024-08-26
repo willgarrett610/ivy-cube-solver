@@ -5,7 +5,7 @@ import { OrbitControls } from '@react-three/drei';
 
 import { absolute, flexCenter, fullSize, padding } from './styles';
 import { useState } from 'react';
-import { StateDto } from './graph/types';
+import { State, StateDto } from './graph/types';
 
 import { FlexColumn, FlexRow } from './components/base/Flex';
 import { Button, Classes, Colors, Tag } from '@blueprintjs/core';
@@ -16,58 +16,62 @@ import { mod } from './utils/math';
 import './App.css';
 import '@blueprintjs/core/lib/css/blueprint.css';
 import { CubeHandler } from './components/ivy-cube/CubeHandler';
+import { genGraph, getSolvePath } from './graph/gen';
 
-// const path = getSolvePath(genGraph()!);
-const path = [
-  {
-    corners: [2, 1, 1, 2],
-    centers: [0, 3, 2, 1, 5, 4],
-  },
-  {
-    corners: [1, 1, 1, 2],
-    centers: [5, 0, 2, 1, 3, 4],
-  },
-  {
-    corners: [1, 1, 2, 2],
-    centers: [5, 4, 0, 1, 3, 2],
-  },
-  {
-    corners: [2, 1, 2, 2],
-    centers: [4, 3, 0, 1, 5, 2],
-  },
-  {
-    corners: [2, 1, 0, 2],
-    centers: [4, 2, 3, 1, 5, 0],
-  },
-  {
-    corners: [0, 1, 0, 2],
-    centers: [2, 5, 3, 1, 4, 0],
-  },
-  {
-    corners: [1, 1, 0, 2],
-    centers: [5, 4, 3, 1, 2, 0],
-  },
-  {
-    corners: [1, 1, 0, 0],
-    centers: [1, 4, 3, 0, 2, 5],
-  },
-  {
-    corners: [1, 2, 0, 0],
-    centers: [1, 4, 0, 2, 3, 5],
-  },
-  {
-    corners: [1, 0, 0, 0],
-    centers: [1, 4, 2, 3, 0, 5],
-  },
-  {
-    corners: [2, 0, 0, 0],
-    centers: [4, 0, 2, 3, 1, 5],
-  },
-  {
-    corners: [0, 0, 0, 0],
-    centers: [0, 1, 2, 3, 4, 5],
-  },
-] satisfies StateDto[];
+const graph = genGraph();
+
+const testState = new State([0,2,2,1], [1,4,2,0,5,3]);
+const path = getSolvePath(graph.get(testState.id)!);
+// const path = [
+//   {
+//     corners: [2, 1, 1, 2],
+//     centers: [0, 3, 2, 1, 5, 4],
+//   },
+//   {
+//     corners: [1, 1, 1, 2],
+//     centers: [5, 0, 2, 1, 3, 4],
+//   },
+//   {
+//     corners: [1, 1, 2, 2],
+//     centers: [5, 4, 0, 1, 3, 2],
+//   },
+//   {
+//     corners: [2, 1, 2, 2],
+//     centers: [4, 3, 0, 1, 5, 2],
+//   },
+//   {
+//     corners: [2, 1, 0, 2],
+//     centers: [4, 2, 3, 1, 5, 0],
+//   },
+//   {
+//     corners: [0, 1, 0, 2],
+//     centers: [2, 5, 3, 1, 4, 0],
+//   },
+//   {
+//     corners: [1, 1, 0, 2],
+//     centers: [5, 4, 3, 1, 2, 0],
+//   },
+//   {
+//     corners: [1, 1, 0, 0],
+//     centers: [1, 4, 3, 0, 2, 5],
+//   },
+//   {
+//     corners: [1, 2, 0, 0],
+//     centers: [1, 4, 0, 2, 3, 5],
+//   },
+//   {
+//     corners: [1, 0, 0, 0],
+//     centers: [1, 4, 2, 3, 0, 5],
+//   },
+//   {
+//     corners: [2, 0, 0, 0],
+//     centers: [4, 0, 2, 3, 1, 5],
+//   },
+//   {
+//     corners: [0, 0, 0, 0],
+//     centers: [0, 1, 2, 3, 4, 5],
+//   },
+// ] satisfies StateDto[];
 
 export const App = () => {
   const [pathIndex, setPathIndex] = useState(0);

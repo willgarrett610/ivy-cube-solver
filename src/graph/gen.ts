@@ -2,29 +2,33 @@ import { Queue } from 'queue-typescript';
 import { Edge, GNode, State } from './types';
 
 export function genGraph() {
-  const visitedNodes = new Map<number, GNode>();
+  console.log('Generating graph...');
+
+  const seenNodes = new Map<number, GNode>();
 
   const solvedState = State.solved();
   const solvedNode = new GNode(solvedState);
 
-  visitedNodes.set(solvedState.id, solvedNode);
+  seenNodes.set(solvedState.id, solvedNode);
 
   const exploreQ = new Queue<GNode>();
 
   let maxDistance = 0;
   let maxNode = undefined;
 
+  seenNodes.set(solvedNode.state.id, solvedNode);
+
   let next = solvedNode;
   while (next != undefined) {
-    visitedNodes.set(next.state.id, next);
-
-    const neighbors = getNeighbors(next, visitedNodes);
+    const neighbors = getNeighbors(next, seenNodes);
 
     for (const neighbor of neighbors) {
-      if (!visitedNodes.has(neighbor.node.state.id)) {
+      if (!seenNodes.has(neighbor.node.state.id)) {
+        seenNodes.set(neighbor.node.state.id, neighbor.node);
+        exploreQ.enqueue(neighbor.node);
+
         neighbor.node.distance = next.distance + 1;
         neighbor.node.solvePathState = next.state;
-        exploreQ.enqueue(neighbor.node);
 
         if (neighbor.node.distance > maxDistance) {
           maxDistance = neighbor.node.distance;
@@ -37,7 +41,9 @@ export function genGraph() {
     next = exploreQ.dequeue();
   }
 
-  return maxNode;
+  console.log(maxNode);
+
+  return seenNodes;
 }
 
 function makeEdge(
