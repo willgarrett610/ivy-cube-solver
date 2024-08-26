@@ -8,6 +8,9 @@ export interface CubeHandlerProps {
   onCornerClick?(corner: 0 | 1 | 2 | 3, side: 0 | 1 | 2 | undefined): void;
   onCenterClick?(center: 0 | 1 | 2 | 3 | 4 | 5): void;
 
+  onCornerRightClick?(corner: 0 | 1 | 2 | 3, side: 0 | 1 | 2 | undefined): void;
+  onCenterRightClick?(center: 0 | 1 | 2 | 3 | 4 | 5): void;
+
   onCornerPointerDown?(corner: 0 | 1 | 2 | 3, side: 0 | 1 | 2 | undefined): void;
   onCornerPointerUp?(corner: 0 | 1 | 2 | 3, side: 0 | 1 | 2 | undefined): void;
   onCornerPointerEnter?(corner: 0 | 1 | 2 | 3, side: 0 | 1 | 2 | undefined): void;
@@ -24,6 +27,8 @@ export const CubeHandler = (props: CubeHandlerProps) => {
     state,
     onCornerClick,
     onCenterClick,
+    onCornerRightClick,
+    onCenterRightClick,
     onCenterPointerDown,
     onCenterPointerUp,
     onCenterPointerEnter,
@@ -59,6 +64,8 @@ export const CubeHandler = (props: CubeHandlerProps) => {
     <IvyCube
       onCornerClick={onCornerClick}
       onCenterClick={onCenterClick}
+      onCornerRightClick={onCornerRightClick}
+      onCenterRightClick={onCenterRightClick}
       onCenterPointerDown={onCenterPointerDown}
       onCenterPointerUp={onCenterPointerUp}
       onCenterPointerEnter={onCenterPointerEnter}

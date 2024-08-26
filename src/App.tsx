@@ -142,19 +142,25 @@ export class AppViewModel extends BaseViewModel {
     );
   }
 
-  handleCornerClick(corner: 0 | 1 | 2 | 3, _side: 0 | 1 | 2 | undefined) {
+  handleCornerClick(
+    corner: 0 | 1 | 2 | 3,
+    _side: 0 | 1 | 2 | undefined,
+    rightClick: boolean,
+  ) {
     if (this.mode === Mode.Solve) return;
 
+    const clockwise = !rightClick;
+
     if (this.mode === Mode.Play) {
-      this.state = this.state.rotate(corner, true);
+      this.state = this.state.rotate(corner, clockwise);
     }
 
     if (this.mode === Mode.Edit) {
-      this.state = this.state.rotateCorner(corner, true);
+      this.state = this.state.rotateCorner(corner, clockwise);
     }
   }
 
-  handleCenterClick(center: 0 | 1 | 2 | 3 | 4 | 5) {
+  handleCenterClick(center: 0 | 1 | 2 | 3 | 4 | 5, _rightClick: boolean) {
     if (this.mode !== Mode.Edit) return;
 
     const newState = State.fromDto(this.state.dto);
@@ -328,8 +334,12 @@ export const App = observer(() => {
           <directionalLight position={[0, 5, 0]} color="white" />
           <directionalLight position={[0, -5, 0]} color="white" />
           <CubeHandler
-            onCornerClick={vm.handleCornerClick}
-            onCenterClick={vm.handleCenterClick}
+            onCornerClick={(corner, side) => vm.handleCornerClick(corner, side, false)}
+            onCornerRightClick={(corner, side) =>
+              vm.handleCornerClick(corner, side, true)
+            }
+            onCenterClick={(center) => vm.handleCenterClick(center, false)}
+            onCenterRightClick={(center) => vm.handleCenterClick(center, true)}
             state={vm.mode === Mode.Solve ? vm.pathState : vm.state}
           />
           <OrbitControls target={[0, 0, 0]} />

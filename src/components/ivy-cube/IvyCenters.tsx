@@ -87,6 +87,7 @@ export interface IvyCentersProps {
   turn?: Turn;
 
   onCenterClick?(center: 0 | 1 | 2 | 3 | 4 | 5): void;
+  onCenterRightClick?(center: 0 | 1 | 2 | 3 | 4 | 5): void;
   onCenterPointerDown?(center: 0 | 1 | 2 | 3 | 4 | 5): void;
   onCenterPointerUp?(center: 0 | 1 | 2 | 3 | 4 | 5): void;
   onCenterPointerEnter?(center: 0 | 1 | 2 | 3 | 4 | 5): void;
@@ -94,7 +95,15 @@ export interface IvyCentersProps {
 }
 
 export const IvyCenters = (props: IvyCentersProps) => {
-  const { turn, offset = 0, meshProps, prevCubeState, cubeState, onCenterClick } = props;
+  const {
+    turn,
+    offset = 0,
+    meshProps,
+    prevCubeState,
+    cubeState,
+    onCenterClick,
+    onCenterRightClick,
+  } = props;
 
   const { value: t, reset, isPlaying } = useScale(0, 1, fps, 1_000);
   const v = useMemo(() => easeInOutCubic(t), [t]);
@@ -144,6 +153,7 @@ export const IvyCenters = (props: IvyCentersProps) => {
               face: centerMapping[centers[i]],
             }}
             onClick={() => onCenterClick?.(i as 0 | 1 | 2 | 3 | 4 | 5)}
+            onRightClick={() => onCenterRightClick?.(i as 0 | 1 | 2 | 3 | 4 | 5)}
             onPointerDown={() => props.onCenterPointerDown?.(i as 0 | 1 | 2 | 3 | 4 | 5)}
             onPointerUp={() => props.onCenterPointerUp?.(i as 0 | 1 | 2 | 3 | 4 | 5)}
             onPointerEnter={() =>

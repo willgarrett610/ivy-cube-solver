@@ -23,6 +23,9 @@ export interface IvyCubeProps {
   onCornerClick?(corner: 0 | 1 | 2 | 3, side: 0 | 1 | 2 | undefined): void;
   onCenterClick?(center: 0 | 1 | 2 | 3 | 4 | 5): void;
 
+  onCornerRightClick?(corner: 0 | 1 | 2 | 3, side: 0 | 1 | 2 | undefined): void;
+  onCenterRightClick?(center: 0 | 1 | 2 | 3 | 4 | 5): void;
+
   onCornerPointerDown?(corner: 0 | 1 | 2 | 3, side: 0 | 1 | 2 | undefined): void;
   onCornerPointerUp?(corner: 0 | 1 | 2 | 3, side: 0 | 1 | 2 | undefined): void;
   onCornerPointerEnter?(corner: 0 | 1 | 2 | 3, side: 0 | 1 | 2 | undefined): void;
@@ -41,7 +44,9 @@ export const IvyCube = observer((props: IvyCubeProps) => {
     cubeState,
     turn,
     onCornerClick,
+    onCornerRightClick,
     onCenterClick,
+    onCenterRightClick,
     onCenterPointerDown,
     onCenterPointerUp,
     onCenterPointerEnter,
@@ -64,6 +69,7 @@ export const IvyCube = observer((props: IvyCubeProps) => {
     <mesh {...meshProps}>
       <IvyCorners
         onCornerClick={onCornerClick}
+        onCornerRightClick={onCornerRightClick}
         onCornerPointerDown={onCornerPointerDown}
         onCornerPointerUp={onCornerPointerUp}
         onCornerPointerEnter={onCornerPointerEnter}
@@ -75,6 +81,7 @@ export const IvyCube = observer((props: IvyCubeProps) => {
       />
       <IvyCenters
         onCenterClick={onCenterClick}
+        onCenterRightClick={onCenterRightClick}
         onCenterPointerDown={onCenterPointerDown}
         onCenterPointerUp={onCenterPointerUp}
         onCenterPointerEnter={onCenterPointerEnter}

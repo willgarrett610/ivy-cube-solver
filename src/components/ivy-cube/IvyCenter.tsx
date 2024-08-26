@@ -7,6 +7,7 @@ export interface IvyCenterProps {
   meshProps: MeshProps;
   colors: { background: THREE.ColorRepresentation; face: THREE.ColorRepresentation };
   onClick?(): void;
+  onRightClick?(): void;
   onPointerDown?(): void;
   onPointerUp?(): void;
   onPointerEnter?(): void;
@@ -18,6 +19,7 @@ export const IvyCenter = (props: IvyCenterProps) => {
     colors,
     meshProps,
     onClick,
+    onRightClick,
     onPointerDown,
     onPointerUp,
     onPointerEnter,
@@ -56,6 +58,10 @@ export const IvyCenter = (props: IvyCenterProps) => {
       {...meshProps}
       onClick={(e) => {
         onClick?.();
+        e.stopPropagation();
+      }}
+      onContextMenu={(e) => {
+        onRightClick?.();
         e.stopPropagation();
       }}
       // onPointerDown={(e) => {

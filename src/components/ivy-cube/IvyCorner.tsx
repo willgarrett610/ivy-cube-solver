@@ -22,15 +22,16 @@ export interface IvyCornerProps {
     y: THREE.ColorRepresentation;
     z: THREE.ColorRepresentation;
   };
-  onCornerClick?(side: 0 | 1 | 2 | undefined): void;
-  onCornerPointerDown?(side: 0 | 1 | 2 | undefined): void;
-  onCornerPointerUp?(side: 0 | 1 | 2 | undefined): void;
-  onCornerPointerEnter?(side: 0 | 1 | 2 | undefined): void;
-  onCornerPointerLeave?(side: 0 | 1 | 2 | undefined): void;
+  onClick?(side: 0 | 1 | 2 | undefined): void;
+  onRightClick?(side: 0 | 1 | 2 | undefined): void;
+  onPointerDown?(side: 0 | 1 | 2 | undefined): void;
+  onPointerUp?(side: 0 | 1 | 2 | undefined): void;
+  onPointerEnter?(side: 0 | 1 | 2 | undefined): void;
+  onPointerLeave?(side: 0 | 1 | 2 | undefined): void;
 }
 
 export const IvyCorner = (props: IvyCornerProps) => {
-  const { colors, meshProps } = props;
+  const { colors, meshProps, onClick, onRightClick } = props;
 
   const meshRef = useRef<THREE.Mesh>(null);
 
@@ -61,7 +62,22 @@ export const IvyCorner = (props: IvyCornerProps) => {
         for (const [key, mapping] of Object.entries(meshMapping)) {
           if (mapping(meshRef.current).geometry.uuid === uuid) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            props.onCornerClick?.((axesToNumbers as any)[key]);
+            onClick?.((axesToNumbers as any)[key]);
+            e.stopPropagation();
+            break;
+          }
+        }
+      }}
+      onContextMenu={(e) => {
+        if (meshRef.current === null) return;
+
+        const clickedMesh = e.object as THREE.Mesh;
+        const uuid = clickedMesh.geometry.uuid;
+
+        for (const [key, mapping] of Object.entries(meshMapping)) {
+          if (mapping(meshRef.current).geometry.uuid === uuid) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            onRightClick?.((axesToNumbers as any)[key]);
             e.stopPropagation();
             break;
           }

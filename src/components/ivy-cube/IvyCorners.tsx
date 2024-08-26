@@ -80,6 +80,7 @@ export interface IvyCornersProps {
   turn?: Turn;
 
   onCornerClick?(corner: 0 | 1 | 2 | 3, side: 0 | 1 | 2 | undefined): void;
+  onCornerRightClick?(corner: 0 | 1 | 2 | 3, side: 0 | 1 | 2 | undefined): void;
   onCornerPointerDown?(corner: 0 | 1 | 2 | 3, side: 0 | 1 | 2 | undefined): void;
   onCornerPointerUp?(corner: 0 | 1 | 2 | 3, side: 0 | 1 | 2 | undefined): void;
   onCornerPointerEnter?(corner: 0 | 1 | 2 | 3, side: 0 | 1 | 2 | undefined): void;
@@ -94,6 +95,7 @@ export const IvyCorners = (props: IvyCornersProps) => {
     prevCubeState,
     cubeState,
     onCornerClick,
+    onCornerRightClick,
     onCornerPointerDown,
     onCornerPointerUp,
     onCornerPointerEnter,
@@ -138,17 +140,12 @@ export const IvyCorners = (props: IvyCornersProps) => {
             axis={cornerAxes[i as 0 | 1 | 2 | 3]}
           >
             <IvyCorner
-              onCornerClick={(side) => onCornerClick?.(i as 0 | 1 | 2 | 3, side)}
-              onCornerPointerDown={(side) =>
-                onCornerPointerDown?.(i as 0 | 1 | 2 | 3, side)
-              }
-              onCornerPointerUp={(side) => onCornerPointerUp?.(i as 0 | 1 | 2 | 3, side)}
-              onCornerPointerEnter={(side) =>
-                onCornerPointerEnter?.(i as 0 | 1 | 2 | 3, side)
-              }
-              onCornerPointerLeave={(side) =>
-                onCornerPointerLeave?.(i as 0 | 1 | 2 | 3, side)
-              }
+              onClick={(side) => onCornerClick?.(i as 0 | 1 | 2 | 3, side)}
+              onRightClick={(side) => onCornerRightClick?.(i as 0 | 1 | 2 | 3, side)}
+              onPointerDown={(side) => onCornerPointerDown?.(i as 0 | 1 | 2 | 3, side)}
+              onPointerUp={(side) => onCornerPointerUp?.(i as 0 | 1 | 2 | 3, side)}
+              onPointerEnter={(side) => onCornerPointerEnter?.(i as 0 | 1 | 2 | 3, side)}
+              onPointerLeave={(side) => onCornerPointerLeave?.(i as 0 | 1 | 2 | 3, side)}
               key={i}
               meshProps={{
                 position: position.map((v) => v * offset) as [number, number, number],
