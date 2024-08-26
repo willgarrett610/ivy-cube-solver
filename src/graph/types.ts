@@ -130,8 +130,8 @@ export class State {
 
   get dto(): StateDto {
     return {
-      corners: this.corners,
-      centers: this.centers,
+      corners: this.corners.slice() as [number, number, number, number],
+      centers: this.centers.slice() as [number, number, number, number, number, number],
     };
   }
 }

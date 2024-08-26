@@ -21,6 +21,7 @@ import { makeSimpleAutoObservable } from './utils/mobx';
 import { observer } from 'mobx-react-lite';
 import { cubeColorKeys, cubeColors } from './utils';
 import { action } from 'mobx';
+import { createContext, useContext } from 'react';
 
 const graph = genGraph();
 
@@ -34,6 +35,10 @@ export class AppViewModel extends BaseViewModel {
   state = State.solved();
   mode = Mode.Play;
 
+  // this is possibly the sloppiest code I've ever written but this
+  // was the easiest hack I could come up with to fix the stupid turning bug
+  doNotTurnPls = false;
+
   solvePath: StateDto[] | null = null;
   pathIndex = 0;
   prevPathIndex = null;
@@ -42,7 +47,13 @@ export class AppViewModel extends BaseViewModel {
 
   constructor() {
     super();
-    makeSimpleAutoObservable(this, {}, { autoBind: true });
+    makeSimpleAutoObservable(
+      this,
+      {
+        doNotTurnPls: false,
+      },
+      { autoBind: true },
+    );
   }
 
   get pathState() {
@@ -56,6 +67,13 @@ export class AppViewModel extends BaseViewModel {
   }
 
   play() {
+    this.doNotTurnPls = true;
+
+    setTimeout(
+      action(() => (this.doNotTurnPls = false)),
+      1,
+    );
+
     if (this.mode === Mode.Solve) {
       this.state = State.fromDto(this.pathState);
     }
@@ -64,6 +82,13 @@ export class AppViewModel extends BaseViewModel {
   }
 
   edit() {
+    this.doNotTurnPls = true;
+
+    setTimeout(
+      action(() => (this.doNotTurnPls = false)),
+      1,
+    );
+
     if (this.mode === Mode.Solve) {
       this.state = State.fromDto(this.pathState);
     }
@@ -73,6 +98,13 @@ export class AppViewModel extends BaseViewModel {
 
   solve() {
     this.mode = Mode.Solve;
+
+    this.doNotTurnPls = true;
+
+    setTimeout(
+      action(() => (this.doNotTurnPls = false)),
+      1,
+    );
 
     this.pathIndex = 0;
 
@@ -101,7 +133,16 @@ export class AppViewModel extends BaseViewModel {
     }
   }
 
-  handleCornerClick(corner: 0 | 1 | 2 | 3, side: 0 | 1 | 2 | undefined) {
+  reset() {
+    this.doNotTurnPls = true;
+    this.state = State.solved();
+    setTimeout(
+      action(() => (this.doNotTurnPls = false)),
+      1,
+    );
+  }
+
+  handleCornerClick(corner: 0 | 1 | 2 | 3, _side: 0 | 1 | 2 | undefined) {
     if (this.mode === Mode.Solve) return;
 
     if (this.mode === Mode.Play) {
@@ -133,47 +174,36 @@ export class AppViewModel extends BaseViewModel {
   }
 }
 
+export const AppViewModelContext = createContext<AppViewModel | null>(null);
+export const useAppViewModel = () => {
+  const vm = useContext(AppViewModelContext);
+
+  if (!vm) {
+    throw new Error('AppViewModelContext not found');
+  }
+
+  return vm;
+};
+
 export const App = observer(() => {
   const vm = useViewModelConstructor(AppViewModel);
 
   return (
-    <div
-      className={Classes.DARK}
-      css={[absolute(), fullSize, flexCenter, { background: Colors.BLACK }]}
-    >
-      <FlexColumn
-        alignItems="center"
-        css={[
-          absolute(0, 0, undefined, 0),
-          padding('xl'),
-          { zIndex: 100, pointerEvents: 'none' },
-        ]}
-        gap={5}
+    <AppViewModelContext.Provider value={vm}>
+      <div
+        className={Classes.DARK}
+        css={[absolute(), fullSize, flexCenter, { background: Colors.BLACK }]}
       >
-        {vm.mode === Mode.Play && (
-          <FlexRow
-            gap={5}
-            css={{
-              pointerEvents: 'all',
-            }}
-          >
-            <Button
-              minimal
-              onClick={vm.solve}
-              icon={IconNames.PredictiveAnalysis}
-              disabled={!vm.isSolvable}
-              intent={vm.isSolvable ? undefined : Intent.WARNING}
-              title={vm.isSolvable ? undefined : 'This cube is not solvable'}
-            >
-              Solve
-            </Button>
-            <Button minimal onClick={vm.edit} icon={IconNames.Edit}>
-              Edit
-            </Button>
-          </FlexRow>
-        )}
-        {vm.mode === Mode.Edit && (
-          <>
+        <FlexColumn
+          alignItems="center"
+          css={[
+            absolute(0, 0, undefined, 0),
+            padding('xl'),
+            { zIndex: 100, pointerEvents: 'none' },
+          ]}
+          gap={5}
+        >
+          {vm.mode === Mode.Play && (
             <FlexRow
               gap={5}
               css={{
@@ -190,94 +220,121 @@ export const App = observer(() => {
               >
                 Solve
               </Button>
-              <Button minimal onClick={vm.play} icon={IconNames.Playbook}>
-                Play
+              <Button minimal onClick={vm.edit} icon={IconNames.Edit}>
+                Edit
               </Button>
             </FlexRow>
+          )}
+          {vm.mode === Mode.Edit && (
+            <>
+              <FlexRow
+                gap={5}
+                css={{
+                  pointerEvents: 'all',
+                }}
+              >
+                <Button
+                  minimal
+                  onClick={vm.solve}
+                  icon={IconNames.PredictiveAnalysis}
+                  disabled={!vm.isSolvable}
+                  intent={vm.isSolvable ? undefined : Intent.WARNING}
+                  title={vm.isSolvable ? undefined : 'This cube is not solvable'}
+                >
+                  Solve
+                </Button>
+                <Button minimal onClick={vm.play} icon={IconNames.Playbook}>
+                  Play
+                </Button>
+                <Button minimal onClick={vm.reset} icon={IconNames.Reset}>
+                  Reset
+                </Button>
+              </FlexRow>
+              <FlexRow
+                gap={5}
+                css={{
+                  pointerEvents: 'all',
+                }}
+              >
+                {cubeColorKeys
+                  .map((key) => ({ key, color: cubeColors[key] }))
+                  .map(({ key, color }) => (
+                    <Button
+                      key={key}
+                      minimal
+                      onClick={action(() => {
+                        vm.editSelectedCenterColor = key;
+                      })}
+                      css={[
+                        {
+                          backgroundColor: `${color} !important`,
+                          width: 50,
+                          height: 50,
+                          filter: 'brightness(0.7)',
+                          '&:hover': {
+                            filter: 'brightness(1)',
+                          },
+                        },
+                        vm.editSelectedCenterColor === key && {
+                          filter: 'brightness(1)',
+                          scale: '1.2',
+                          zIndex: 1,
+                        },
+                      ]}
+                    />
+                  ))}
+              </FlexRow>
+            </>
+          )}
+          {vm.mode === Mode.Solve && vm.solvePath && (
             <FlexRow
               gap={5}
               css={{
                 pointerEvents: 'all',
               }}
             >
-              {cubeColorKeys
-                .map((key) => ({ key, color: cubeColors[key] }))
-                .map(({ key, color }) => (
-                  <Button
-                    key={key}
-                    minimal
-                    onClick={action(() => {
-                      vm.editSelectedCenterColor = key;
-                    })}
-                    css={[
-                      {
-                        backgroundColor: `${color} !important`,
-                        width: 50,
-                        height: 50,
-                        filter: 'brightness(0.7)',
-                        '&:hover': {
-                          filter: 'brightness(1)',
-                        },
-                      },
-                      vm.editSelectedCenterColor === key && {
-                        filter: 'brightness(1)',
-                        scale: '1.2',
-                        zIndex: 1,
-                      },
-                    ]}
-                  />
-                ))}
+              <Button minimal onClick={vm.play} icon={IconNames.Playbook}>
+                Play
+              </Button>
+              <Button minimal onClick={vm.edit} icon={IconNames.Edit}>
+                Edit
+              </Button>
+              <Button
+                minimal
+                disabled={vm.pathIndex <= 0}
+                onClick={vm.prev}
+                icon={IconNames.ChevronLeft}
+              />
+              <Tag large minimal css={{ width: 70, textAlign: 'center' }}>
+                {vm.pathIndex + 1} / {vm.solvePath.length}
+              </Tag>
+              <Button
+                minimal
+                disabled={vm.pathIndex >= vm.solvePath.length - 1}
+                onClick={vm.next}
+                rightIcon={IconNames.ChevronRight}
+              />
             </FlexRow>
-          </>
-        )}
-        {vm.mode === Mode.Solve && vm.solvePath && (
-          <FlexRow
-            gap={5}
-            css={{
-              pointerEvents: 'all',
-            }}
-          >
-            <Button minimal onClick={vm.play} icon={IconNames.Playbook}>
-              Play
-            </Button>
-            <Button minimal onClick={vm.edit} icon={IconNames.Edit}>
-              Edit
-            </Button>
-            <Button
-              minimal
-              disabled={vm.pathIndex <= 0}
-              onClick={vm.prev}
-              icon={IconNames.ChevronLeft}
-            />
-            <Tag large minimal css={{ width: 70, textAlign: 'center' }}>
-              {vm.pathIndex + 1} / {vm.solvePath.length}
-            </Tag>
-            <Button
-              minimal
-              disabled={vm.pathIndex >= vm.solvePath.length - 1}
-              onClick={vm.next}
-              rightIcon={IconNames.ChevronRight}
-            />
-          </FlexRow>
-        )}
-      </FlexColumn>
-      <Canvas
-        camera={{
-          position: [15, 15, 15],
-        }}
-      >
-        <ambientLight />
-        <directionalLight position={[0, 0, 5]} color="white" />
-        <directionalLight position={[0, 0, -5]} color="white" />
-        <directionalLight position={[0, 5, 0]} color="white" />
-        <directionalLight position={[0, -5, 0]} color="white" />
-        <CubeHandler
-          onCornerClick={vm.handleCornerClick}
-          onCenterClick={vm.handleCenterClick}
-          state={vm.mode === Mode.Solve ? vm.pathState : vm.state}
-        />
-        <OrbitControls target={[0, 0, 0]} />
-      </Canvas>
-    </div>
+          )}
+        </FlexColumn>
+        <Canvas
+          camera={{
+            position: [15, 15, 15],
+          }}
+        >
+          <ambientLight />
+          <directionalLight position={[0, 0, 5]} color="white" />
+          <directionalLight position={[0, 0, -5]} color="white" />
+          <directionalLight position={[0, 5, 0]} color="white" />
+          <directionalLight position={[0, -5, 0]} color="white" />
+          <CubeHandler
+            onCornerClick={vm.handleCornerClick}
+            onCenterClick={vm.handleCenterClick}
+            state={vm.mode === Mode.Solve ? vm.pathState : vm.state}
+          />
+          <OrbitControls target={[0, 0, 0]} />
+        </Canvas>
+      </div>
+    </AppViewModelContext.Provider>
   );
 });

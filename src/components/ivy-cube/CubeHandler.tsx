@@ -59,15 +59,15 @@ export const CubeHandler = (props: CubeHandlerProps) => {
     <IvyCube
       onCornerClick={onCornerClick}
       onCenterClick={onCenterClick}
-      // onCenterPointerDown={onCenterPointerDown}
-      // onCenterPointerUp={onCenterPointerUp}
-      // onCenterPointerEnter={onCenterPointerEnter}
-      // onCenterPointerLeave={onCenterPointerLeave}
-      // onCornerPointerDown={onCornerPointerDown}
-      // onCornerPointerUp={onCornerPointerUp}
-      // onCornerPointerEnter={onCornerPointerEnter}
-      // onCornerPointerLeave={onCornerPointerLeave}
-      turn={turn}
+      onCenterPointerDown={onCenterPointerDown}
+      onCenterPointerUp={onCenterPointerUp}
+      onCenterPointerEnter={onCenterPointerEnter}
+      onCenterPointerLeave={onCenterPointerLeave}
+      onCornerPointerDown={onCornerPointerDown}
+      onCornerPointerUp={onCornerPointerUp}
+      onCornerPointerEnter={onCornerPointerEnter}
+      onCornerPointerLeave={onCornerPointerLeave}
+      turn={turn ?? undefined}
       prevCubeState={prevState}
       cubeState={state}
     />

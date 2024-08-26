@@ -8,6 +8,8 @@ import { easeOutCubic, lerp } from '../../utils/math';
 import { useScale } from '../../utils/react/hooks';
 import { IvyCorners } from './IvyCorners';
 import { IvyCenters } from './IvyCenters';
+import { Mode, useAppViewModel } from '../../App';
+import { observer } from 'mobx-react-lite';
 
 const offset = 3.85;
 const fps = 30;
@@ -32,7 +34,7 @@ export interface IvyCubeProps {
   onCenterPointerLeave?(center: 0 | 1 | 2 | 3 | 4 | 5): void;
 }
 
-export const IvyCube = (props: IvyCubeProps) => {
+export const IvyCube = observer((props: IvyCubeProps) => {
   const {
     meshProps,
     prevCubeState,
@@ -50,6 +52,10 @@ export const IvyCube = (props: IvyCubeProps) => {
     onCornerPointerLeave,
   } = props;
 
+  const appVm = useAppViewModel();
+
+  const usedTurn = appVm.doNotTurnPls ? undefined : turn;
+
   const { value: t } = useScale(0, 1, fps, 2_500);
   const v = easeOutCubic(t);
   const usedOffset = lerp(50, offset, v);
@@ -65,7 +71,7 @@ export const IvyCube = (props: IvyCubeProps) => {
         prevCubeState={prevCubeState}
         cubeState={cubeState}
         offset={usedOffset}
-        turn={turn}
+        turn={usedTurn}
       />
       <IvyCenters
         onCenterClick={onCenterClick}
@@ -76,7 +82,7 @@ export const IvyCube = (props: IvyCubeProps) => {
         prevCubeState={prevCubeState}
         cubeState={cubeState}
         offset={usedOffset}
-        turn={turn}
+        turn={appVm.mode !== Mode.Edit ? usedTurn : undefined}
       />
       <mesh>
         <sphereGeometry args={[offset, 32, 32]} />
@@ -84,4 +90,4 @@ export const IvyCube = (props: IvyCubeProps) => {
       </mesh>
     </mesh>
   );
-};
+});

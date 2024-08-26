@@ -100,7 +100,7 @@ export const IvyCorners = (props: IvyCornersProps) => {
     onCornerPointerLeave,
   } = props;
 
-  const { value: t, reset, isPlaying } = useScale(0, 1, fps, 2_500);
+  const { value: t, reset, isPlaying } = useScale(0, 1, fps, 1_000);
   const v = useMemo(() => easeInOutCubic(t), [t]);
   const angle = useMemo(
     () => (turn ? lerp(0, -((2 * Math.PI) / 3) * turn.turnDirection, v) : 0),
