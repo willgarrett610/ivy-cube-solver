@@ -67,66 +67,66 @@ export const IvyCorner = (props: IvyCornerProps) => {
           }
         }
       }}
-      onPointerDown={(e) => {
-        if (meshRef.current === null) return;
+      // onPointerDown={(e) => {
+      //   if (meshRef.current === null) return;
 
-        const clickedMesh = e.object as THREE.Mesh;
-        const uuid = clickedMesh.geometry.uuid;
+      //   const clickedMesh = e.object as THREE.Mesh;
+      //   const uuid = clickedMesh.geometry.uuid;
 
-        for (const [key, mapping] of Object.entries(meshMapping)) {
-          if (mapping(meshRef.current).geometry.uuid === uuid) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            props.onCornerPointerDown?.((axesToNumbers as any)[key]);
-            e.stopPropagation();
-            break;
-          }
-        }
-      }}
-      onPointerUp={(e) => {
-        if (meshRef.current === null) return;
+      //   for (const [key, mapping] of Object.entries(meshMapping)) {
+      //     if (mapping(meshRef.current).geometry.uuid === uuid) {
+      //       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      //       props.onCornerPointerDown?.((axesToNumbers as any)[key]);
+      //       e.stopPropagation();
+      //       break;
+      //     }
+      //   }
+      // }}
+      // onPointerUp={(e) => {
+      //   if (meshRef.current === null) return;
 
-        const clickedMesh = e.object as THREE.Mesh;
-        const uuid = clickedMesh.geometry.uuid;
+      //   const clickedMesh = e.object as THREE.Mesh;
+      //   const uuid = clickedMesh.geometry.uuid;
 
-        for (const [key, mapping] of Object.entries(meshMapping)) {
-          if (mapping(meshRef.current).geometry.uuid === uuid) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            props.onCornerPointerUp?.((axesToNumbers as any)[key]);
-            e.stopPropagation();
-            break;
-          }
-        }
-      }}
-      onPointerEnter={(e) => {
-        if (meshRef.current === null) return;
+      //   for (const [key, mapping] of Object.entries(meshMapping)) {
+      //     if (mapping(meshRef.current).geometry.uuid === uuid) {
+      //       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      //       props.onCornerPointerUp?.((axesToNumbers as any)[key]);
+      //       e.stopPropagation();
+      //       break;
+      //     }
+      //   }
+      // }}
+      // onPointerEnter={(e) => {
+      //   if (meshRef.current === null) return;
 
-        const clickedMesh = e.object as THREE.Mesh;
-        const uuid = clickedMesh.geometry.uuid;
+      //   const clickedMesh = e.object as THREE.Mesh;
+      //   const uuid = clickedMesh.geometry.uuid;
 
-        for (const [key, mapping] of Object.entries(meshMapping)) {
-          if (mapping(meshRef.current).geometry.uuid === uuid) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            props.onCornerPointerEnter?.((axesToNumbers as any)[key]);
-            e.stopPropagation();
-            break;
-          }
-        }
-      }}
-      onPointerLeave={(e) => {
-        if (meshRef.current === null) return;
+      //   for (const [key, mapping] of Object.entries(meshMapping)) {
+      //     if (mapping(meshRef.current).geometry.uuid === uuid) {
+      //       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      //       props.onCornerPointerEnter?.((axesToNumbers as any)[key]);
+      //       e.stopPropagation();
+      //       break;
+      //     }
+      //   }
+      // }}
+      // onPointerLeave={(e) => {
+      //   if (meshRef.current === null) return;
 
-        const clickedMesh = e.object as THREE.Mesh;
-        const uuid = clickedMesh.geometry.uuid;
+      //   const clickedMesh = e.object as THREE.Mesh;
+      //   const uuid = clickedMesh.geometry.uuid;
 
-        for (const [key, mapping] of Object.entries(meshMapping)) {
-          if (mapping(meshRef.current).geometry.uuid === uuid) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            props.onCornerPointerLeave?.((axesToNumbers as any)[key]);
-            e.stopPropagation();
-            break;
-          }
-        }
-      }}
+      //   for (const [key, mapping] of Object.entries(meshMapping)) {
+      //     if (mapping(meshRef.current).geometry.uuid === uuid) {
+      //       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      //       props.onCornerPointerLeave?.((axesToNumbers as any)[key]);
+      //       e.stopPropagation();
+      //       break;
+      //     }
+      //   }
+      // }}
     >
       <IvyCornerModel />
     </mesh>

@@ -58,22 +58,22 @@ export const IvyCenter = (props: IvyCenterProps) => {
         onClick?.();
         e.stopPropagation();
       }}
-      onPointerDown={(e) => {
-        onPointerDown?.();
-        e.stopPropagation();
-      }}
-      onPointerUp={(e) => {
-        onPointerUp?.();
-        e.stopPropagation();
-      }}
-      onPointerEnter={(e) => {
-        onPointerEnter?.();
-        e.stopPropagation();
-      }}
-      onPointerLeave={(e) => {
-        onPointerLeave?.();
-        e.stopPropagation();
-      }}
+      // onPointerDown={(e) => {
+      //   onPointerDown?.();
+      //   e.stopPropagation();
+      // }}
+      // onPointerUp={(e) => {
+      //   onPointerUp?.();
+      //   e.stopPropagation();
+      // }}
+      // onPointerEnter={(e) => {
+      //   onPointerEnter?.();
+      //   e.stopPropagation();
+      // }}
+      // onPointerLeave={(e) => {
+      //   onPointerLeave?.();
+      //   e.stopPropagation();
+      // }}
     >
       <IvyCenterModel />
     </mesh>
