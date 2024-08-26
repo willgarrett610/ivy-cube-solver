@@ -7,3 +7,12 @@ export const cubeColors = {
   orange: '#e77b00',
   internals: '#000000',
 } as const;
+
+export const cubeColorKeys = [
+  'white',
+  'yellow',
+  'blue',
+  'green',
+  'red',
+  'orange',
+] as const;

@@ -1,3 +1,5 @@
+import { makeAutoObservable } from 'mobx';
+
 export class Edge {
   corner: number;
   clockwise: boolean;
@@ -59,9 +61,19 @@ export class State {
   ) {
     this.corners = corners;
     this.centers = centers;
+
+    makeAutoObservable(this, {}, { autoBind: true });
   }
 
   static solved = () => new State([0, 0, 0, 0], [0, 1, 2, 3, 4, 5]);
+
+  rotateCorner(corner: number, clockwise: boolean) {
+    const result = State.fromDto(this.dto);
+
+    result.corners[corner] = (this.corners[corner] + (clockwise ? 1 : 2)) % 3;
+
+    return result;
+  }
 
   rotate(corner: number, clockwise: boolean): State {
     const corners = this.corners.slice() as [number, number, number, number];
