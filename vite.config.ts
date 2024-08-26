@@ -6,6 +6,7 @@ export default defineConfig({
   build: {
     sourcemap: true,
   },
+  base: './',
   plugins: [
     react({
       jsxImportSource: '@emotion/react',
