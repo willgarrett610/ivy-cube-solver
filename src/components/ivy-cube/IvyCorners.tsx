@@ -78,10 +78,27 @@ export interface IvyCornersProps {
   prevCubeState?: StateDto;
   cubeState: StateDto;
   turn?: Turn;
+
+  onCornerClick?(corner: 0 | 1 | 2 | 3, side: 0 | 1 | 2 | undefined): void;
+  onCornerPointerDown?(corner: 0 | 1 | 2 | 3, side: 0 | 1 | 2 | undefined): void;
+  onCornerPointerUp?(corner: 0 | 1 | 2 | 3, side: 0 | 1 | 2 | undefined): void;
+  onCornerPointerEnter?(corner: 0 | 1 | 2 | 3, side: 0 | 1 | 2 | undefined): void;
+  onCornerPointerLeave?(corner: 0 | 1 | 2 | 3, side: 0 | 1 | 2 | undefined): void;
 }
 
 export const IvyCorners = (props: IvyCornersProps) => {
-  const { turn, offset = 0, meshProps, prevCubeState, cubeState } = props;
+  const {
+    turn,
+    offset = 0,
+    meshProps,
+    prevCubeState,
+    cubeState,
+    onCornerClick,
+    onCornerPointerDown,
+    onCornerPointerUp,
+    onCornerPointerEnter,
+    onCornerPointerLeave,
+  } = props;
 
   const { value: t, reset, isPlaying } = useScale(0, 1, fps, 2_500);
   const v = useMemo(() => easeInOutCubic(t), [t]);
@@ -121,13 +138,24 @@ export const IvyCorners = (props: IvyCornersProps) => {
             axis={cornerAxes[i as 0 | 1 | 2 | 3]}
           >
             <IvyCorner
+              onCornerClick={(side) => onCornerClick?.(i as 0 | 1 | 2 | 3, side)}
+              onCornerPointerDown={(side) =>
+                onCornerPointerDown?.(i as 0 | 1 | 2 | 3, side)
+              }
+              onCornerPointerUp={(side) => onCornerPointerUp?.(i as 0 | 1 | 2 | 3, side)}
+              onCornerPointerEnter={(side) =>
+                onCornerPointerEnter?.(i as 0 | 1 | 2 | 3, side)
+              }
+              onCornerPointerLeave={(side) =>
+                onCornerPointerLeave?.(i as 0 | 1 | 2 | 3, side)
+              }
               key={i}
               meshProps={{
                 position: position.map((v) => v * offset) as [number, number, number],
                 rotation,
               }}
               // I do not know why the spread is necessary here, but it is
-              colors={{ ...colors }}
+              colors={colors}
             />
           </Rotate>
         );

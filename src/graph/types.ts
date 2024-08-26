@@ -38,6 +38,13 @@ export interface StateDto {
   centers: [number, number, number, number, number, number];
 }
 
+export function isStateDtoEqual(a: StateDto, b: StateDto) {
+  return (
+    a.corners.every((v, i) => v === b.corners[i]) &&
+    a.centers.every((v, i) => v === b.centers[i])
+  );
+}
+
 export class State {
   corners: [number, number, number, number];
   centers: [number, number, number, number, number, number];

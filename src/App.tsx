@@ -4,7 +4,7 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 
 import { absolute, flexCenter, fullSize, padding } from './styles';
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { StateDto } from './graph/types';
 
 import { FlexColumn, FlexRow } from './components/base/Flex';
@@ -12,12 +12,10 @@ import { Button, Classes, Colors, Tag } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
 
 import { mod } from './utils/math';
-import { IvyCube } from './components/ivy-cube/IvyCube';
-
-import { getTurnFromStateChange } from './graph/util';
 
 import './App.css';
 import '@blueprintjs/core/lib/css/blueprint.css';
+import { CubeHandler } from './components/ivy-cube/CubeHandler';
 
 // const path = getSolvePath(genGraph()!);
 const path = [
@@ -71,32 +69,18 @@ const path = [
   },
 ] satisfies StateDto[];
 
-export const animationTimeMs = 2_500;
-
-function App() {
-  const [prevPathIndex, setPrevPathIndex] = useState<number | null>(null);
+export const App = () => {
   const [pathIndex, setPathIndex] = useState(0);
 
   const incrementPathIndex = () => {
-    setPrevPathIndex(pathIndex);
     setPathIndex((prev) => mod(prev + 1, path.length));
   };
 
   const decrementPathIndex = () => {
-    setPrevPathIndex(pathIndex);
     setPathIndex((prev) => mod(prev - 1, path.length));
   };
 
-  const prevPathState = prevPathIndex !== null ? path[prevPathIndex] : undefined;
   const pathState = path[pathIndex];
-
-  const turn = useMemo(
-    () =>
-      prevPathState !== undefined
-        ? getTurnFromStateChange(prevPathState, pathState)
-        : undefined,
-    [prevPathState, pathState],
-  );
 
   return (
     <div
@@ -145,11 +129,33 @@ function App() {
         <directionalLight position={[0, 0, -5]} color="white" />
         <directionalLight position={[0, 5, 0]} color="white" />
         <directionalLight position={[0, -5, 0]} color="white" />
-        <IvyCube prevCubeState={prevPathState} cubeState={pathState} turn={turn} />
+        <CubeHandler
+          onCornerClick={(corner, side) => console.log('corner click', { corner, side })}
+          onCenterClick={(center) => console.log('center click', { center })}
+          onCenterPointerDown={(center) => console.log('center pointer down', { center })}
+          onCenterPointerUp={(center) => console.log('center pointer up', { center })}
+          onCenterPointerEnter={(center) =>
+            console.log('center pointer enter', { center })
+          }
+          onCenterPointerLeave={(center) =>
+            console.log('center pointer leave', { center })
+          }
+          onCornerPointerDown={(corner, side) =>
+            console.log('corner pointer down', { corner, side })
+          }
+          onCornerPointerUp={(corner, side) =>
+            console.log('corner pointer up', { corner, side })
+          }
+          onCornerPointerEnter={(corner, side) =>
+            console.log('corner pointer enter', { corner, side })
+          }
+          onCornerPointerLeave={(corner, side) =>
+            console.log('corner pointer leave', { corner, side })
+          }
+          state={pathState}
+        />
         <OrbitControls target={[0, 0, 0]} />
       </Canvas>
     </div>
   );
-}
-
-export default App;
+};

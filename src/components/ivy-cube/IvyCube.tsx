@@ -17,10 +17,38 @@ export interface IvyCubeProps {
   prevCubeState?: StateDto;
   cubeState: StateDto;
   turn?: Turn;
+
+  onCornerClick?(corner: 0 | 1 | 2 | 3, side: 0 | 1 | 2 | undefined): void;
+  onCenterClick?(center: 0 | 1 | 2 | 3 | 4 | 5): void;
+
+  onCornerPointerDown?(corner: 0 | 1 | 2 | 3, side: 0 | 1 | 2 | undefined): void;
+  onCornerPointerUp?(corner: 0 | 1 | 2 | 3, side: 0 | 1 | 2 | undefined): void;
+  onCornerPointerEnter?(corner: 0 | 1 | 2 | 3, side: 0 | 1 | 2 | undefined): void;
+  onCornerPointerLeave?(corner: 0 | 1 | 2 | 3, side: 0 | 1 | 2 | undefined): void;
+
+  onCenterPointerDown?(center: 0 | 1 | 2 | 3 | 4 | 5): void;
+  onCenterPointerUp?(center: 0 | 1 | 2 | 3 | 4 | 5): void;
+  onCenterPointerEnter?(center: 0 | 1 | 2 | 3 | 4 | 5): void;
+  onCenterPointerLeave?(center: 0 | 1 | 2 | 3 | 4 | 5): void;
 }
 
 export const IvyCube = (props: IvyCubeProps) => {
-  const { meshProps, prevCubeState, cubeState, turn } = props;
+  const {
+    meshProps,
+    prevCubeState,
+    cubeState,
+    turn,
+    onCornerClick,
+    onCenterClick,
+    onCenterPointerDown,
+    onCenterPointerUp,
+    onCenterPointerEnter,
+    onCenterPointerLeave,
+    onCornerPointerDown,
+    onCornerPointerUp,
+    onCornerPointerEnter,
+    onCornerPointerLeave,
+  } = props;
 
   const { value: t } = useScale(0, 1, fps, 2_500);
   const v = easeOutCubic(t);
@@ -29,12 +57,22 @@ export const IvyCube = (props: IvyCubeProps) => {
   return (
     <mesh {...meshProps}>
       <IvyCorners
+        onCornerClick={onCornerClick}
+        onCornerPointerDown={onCornerPointerDown}
+        onCornerPointerUp={onCornerPointerUp}
+        onCornerPointerEnter={onCornerPointerEnter}
+        onCornerPointerLeave={onCornerPointerLeave}
         prevCubeState={prevCubeState}
         cubeState={cubeState}
         offset={usedOffset}
         turn={turn}
       />
       <IvyCenters
+        onCenterClick={onCenterClick}
+        onCenterPointerDown={onCenterPointerDown}
+        onCenterPointerUp={onCenterPointerUp}
+        onCenterPointerEnter={onCenterPointerEnter}
+        onCenterPointerLeave={onCenterPointerLeave}
         prevCubeState={prevCubeState}
         cubeState={cubeState}
         offset={usedOffset}

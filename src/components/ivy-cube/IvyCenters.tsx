@@ -7,7 +7,6 @@ import { easeInOutCubic, lerp } from '../../utils/math';
 import { useEffect, useMemo } from 'react';
 import { Rotate } from '../three/Rotate';
 import { cornerAxes } from './IvyCorners';
-import { is } from '@react-three/fiber/dist/declarations/src/core/utils';
 
 const centerMapping: Record<number, string> = {
   0: cubeColors.blue,
@@ -86,10 +85,16 @@ export interface IvyCentersProps {
   prevCubeState?: StateDto;
   cubeState: StateDto;
   turn?: Turn;
+
+  onCenterClick?(center: 0 | 1 | 2 | 3 | 4 | 5): void;
+  onCenterPointerDown?(center: 0 | 1 | 2 | 3 | 4 | 5): void;
+  onCenterPointerUp?(center: 0 | 1 | 2 | 3 | 4 | 5): void;
+  onCenterPointerEnter?(center: 0 | 1 | 2 | 3 | 4 | 5): void;
+  onCenterPointerLeave?(center: 0 | 1 | 2 | 3 | 4 | 5): void;
 }
 
 export const IvyCenters = (props: IvyCentersProps) => {
-  const { turn, offset = 0, meshProps, prevCubeState, cubeState } = props;
+  const { turn, offset = 0, meshProps, prevCubeState, cubeState, onCenterClick } = props;
 
   const { value: t, reset, isPlaying } = useScale(0, 1, fps, 2_500);
   const v = useMemo(() => easeInOutCubic(t), [t]);
@@ -138,6 +143,15 @@ export const IvyCenters = (props: IvyCentersProps) => {
               background: centerData.colors.background,
               face: centerMapping[centers[i]],
             }}
+            onClick={() => onCenterClick?.(i as 0 | 1 | 2 | 3 | 4 | 5)}
+            onPointerDown={() => props.onCenterPointerDown?.(i as 0 | 1 | 2 | 3 | 4 | 5)}
+            onPointerUp={() => props.onCenterPointerUp?.(i as 0 | 1 | 2 | 3 | 4 | 5)}
+            onPointerEnter={() =>
+              props.onCenterPointerEnter?.(i as 0 | 1 | 2 | 3 | 4 | 5)
+            }
+            onPointerLeave={() =>
+              props.onCenterPointerLeave?.(i as 0 | 1 | 2 | 3 | 4 | 5)
+            }
           />
         );
 

@@ -6,10 +6,23 @@ import { IvyCenterModel } from './Models';
 export interface IvyCenterProps {
   meshProps: MeshProps;
   colors: { background: THREE.ColorRepresentation; face: THREE.ColorRepresentation };
+  onClick?(): void;
+  onPointerDown?(): void;
+  onPointerUp?(): void;
+  onPointerEnter?(): void;
+  onPointerLeave?(): void;
 }
 
 export const IvyCenter = (props: IvyCenterProps) => {
-  const { colors, meshProps } = props;
+  const {
+    colors,
+    meshProps,
+    onClick,
+    onPointerDown,
+    onPointerUp,
+    onPointerEnter,
+    onPointerLeave,
+  } = props;
 
   const meshRef = useRef<THREE.Mesh>(null);
 
@@ -38,7 +51,30 @@ export const IvyCenter = (props: IvyCenterProps) => {
   }, [colors]);
 
   return (
-    <mesh ref={meshRef} {...meshProps}>
+    <mesh
+      ref={meshRef}
+      {...meshProps}
+      onClick={(e) => {
+        onClick?.();
+        e.stopPropagation();
+      }}
+      onPointerDown={(e) => {
+        onPointerDown?.();
+        e.stopPropagation();
+      }}
+      onPointerUp={(e) => {
+        onPointerUp?.();
+        e.stopPropagation();
+      }}
+      onPointerEnter={(e) => {
+        onPointerEnter?.();
+        e.stopPropagation();
+      }}
+      onPointerLeave={(e) => {
+        onPointerLeave?.();
+        e.stopPropagation();
+      }}
+    >
       <IvyCenterModel />
     </mesh>
   );
