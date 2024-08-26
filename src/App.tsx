@@ -4,7 +4,6 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 
 import { absolute, flexCenter, fullSize, padding } from './styles';
-import { useState } from 'react';
 import { State, StateDto } from './graph/types';
 
 import { FlexColumn, FlexRow } from './components/base/Flex';
