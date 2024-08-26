@@ -338,7 +338,7 @@ export const App = observer(() => {
         </FlexColumn>
         <Canvas
           camera={{
-            position: [15, 15, 15],
+            position: [10, 10, 10],
           }}
         >
           <ambientLight />
