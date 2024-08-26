@@ -161,6 +161,13 @@ export class AppViewModel extends BaseViewModel {
   }
 
   handleCenterClick(center: 0 | 1 | 2 | 3 | 4 | 5, _rightClick: boolean) {
+    this.doNotTurnPls = true;
+
+    setTimeout(
+      action(() => (this.doNotTurnPls = false)),
+      1,
+    );
+
     if (this.mode !== Mode.Edit) return;
 
     const newState = State.fromDto(this.state.dto);
@@ -269,6 +276,12 @@ export const App = observer(() => {
                       key={key}
                       minimal
                       onClick={action(() => {
+                        vm.doNotTurnPls = true;
+
+                        setTimeout(
+                          action(() => (vm.doNotTurnPls = false)),
+                          1,
+                        );
                         vm.editSelectedCenterColor = key;
                       })}
                       css={[
