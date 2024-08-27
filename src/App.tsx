@@ -188,7 +188,22 @@ export class AppViewModel extends BaseViewModel {
       yellow: 1,
     };
 
+    const reverseColorMapping: Record<
+      0 | 1 | 2 | 3 | 4 | 5,
+      typeof cubeColorKeys[number]
+    > = {
+      3: 'white',
+      5: 'red',
+      0: 'blue',
+      2: 'green',
+      4: 'orange',
+      1: 'yellow',
+    };
+
+    const prevColor = newState.centers[center];
     newState.centers[center] = colorMapping[this.editSelectedCenterColor];
+    this.editSelectedCenterColor =
+      reverseColorMapping[prevColor as 0 | 1 | 2 | 3 | 4 | 5];
 
     this.state = newState;
   }
