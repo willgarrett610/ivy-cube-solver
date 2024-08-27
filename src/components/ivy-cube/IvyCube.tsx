@@ -4,21 +4,23 @@ import { MeshProps } from '@react-three/fiber';
 import { StateDto, Turn } from '../../graph/types';
 
 import { cubeColors } from '../../utils';
-import { easeOutCubic, lerp } from '../../utils/math';
-import { useScale } from '../../utils/react/hooks';
 import { IvyCorners } from './IvyCorners';
 import { IvyCenters } from './IvyCenters';
 import { Mode, useAppViewModel } from '../../App';
 import { observer } from 'mobx-react-lite';
 import { Rotate } from '../three/Rotate';
+import { Vector3 } from '../../utils/math/Vector3';
 
-const offset = 3.85;
-const fps = 30;
+export const defaultOffset = 3.85;
 
 export interface IvyCubeProps {
   meshProps?: MeshProps;
   cubeState: StateDto;
   turn?: Turn;
+
+  offset?: number;
+  angle?: number;
+  coreSize?: number;
 
   onCornerClick?(corner: 0 | 1 | 2 | 3, side: 0 | 1 | 2 | undefined): void;
   onCenterClick?(center: 0 | 1 | 2 | 3 | 4 | 5): void;
@@ -42,6 +44,9 @@ export const IvyCube = observer((props: IvyCubeProps) => {
     meshProps,
     cubeState,
     turn,
+    angle = 0,
+    coreSize = defaultOffset,
+    offset = defaultOffset,
     onCornerClick,
     onCornerRightClick,
     onCenterClick,
@@ -60,14 +65,9 @@ export const IvyCube = observer((props: IvyCubeProps) => {
 
   const usedTurn = appVm.doNotTurnPls ? undefined : turn;
 
-  const { value: t } = useScale(0, 1, fps, 2_500);
-  const v = easeOutCubic(t);
-  const usedOffset = lerp(50, offset, v);
-  const usedAngle = lerp(0, 2 * Math.PI, v);
-
   return (
     <mesh {...meshProps}>
-      <Rotate axis={[1, 1, 1]} angle={usedAngle}>
+      <Rotate axis={Vector3.ones().normalized.asTuple} angle={angle}>
         <IvyCorners
           onCornerClick={onCornerClick}
           onCornerRightClick={onCornerRightClick}
@@ -76,7 +76,7 @@ export const IvyCube = observer((props: IvyCubeProps) => {
           onCornerPointerEnter={onCornerPointerEnter}
           onCornerPointerLeave={onCornerPointerLeave}
           cubeState={cubeState}
-          offset={usedOffset}
+          offset={offset}
           turn={usedTurn}
         />
         <IvyCenters
@@ -87,12 +87,12 @@ export const IvyCube = observer((props: IvyCubeProps) => {
           onCenterPointerEnter={onCenterPointerEnter}
           onCenterPointerLeave={onCenterPointerLeave}
           cubeState={cubeState}
-          offset={usedOffset}
+          offset={offset}
           turn={appVm.mode !== Mode.Edit ? usedTurn : undefined}
         />
       </Rotate>
       <mesh>
-        <sphereGeometry args={[offset, 32, 32]} />
+        <sphereGeometry args={[coreSize, 32, 32]} />
         <meshStandardMaterial color={cubeColors.internals} roughness={0.5} />
       </mesh>
     </mesh>

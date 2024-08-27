@@ -29,6 +29,14 @@ export class Vector3 {
   }
 
   /**
+   * Creates a Vector3 with all components set to one.
+   * @returns A new Vector3 instance with all components set to one.
+   */
+  static ones(): Vector3 {
+    return new Vector3(1, 1, 1);
+  }
+
+  /**
    * Creates a Vector3 representing the forward direction.
    * @returns A new Vector3 instance representing the forward direction.
    */

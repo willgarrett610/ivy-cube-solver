@@ -31,6 +31,12 @@ export enum Mode {
   Play,
 }
 
+export enum ExplodingState {
+  Exploding,
+  UnExploding,
+  Done,
+}
+
 export class AppViewModel extends BaseViewModel {
   state = State.solved();
   mode = Mode.Play;
@@ -185,6 +191,50 @@ export class AppViewModel extends BaseViewModel {
 
     this.state = newState;
   }
+
+  // Whoever wrote this exploding code did a terrible job
+  explodingState: ExplodingState = ExplodingState.Done;
+  explodingTimeMs = 500;
+  explodeTimeout: number | null = null;
+
+  explodeShuffle() {
+    this.explodingState = ExplodingState.Exploding;
+    this.explodeTimeout = setTimeout(
+      action(() => {
+        this.explodingState = ExplodingState.UnExploding;
+        this.shuffle();
+        this.explodeTimeout = setTimeout(
+          action(() => {
+            this.explodingState = ExplodingState.Done;
+          }),
+          this.explodingTimeMs,
+        );
+      }),
+      this.explodingTimeMs,
+    );
+  }
+
+  cancelExplode() {
+    if (this.explodeTimeout) {
+      clearTimeout(this.explodeTimeout);
+    }
+
+    this.explodingState = ExplodingState.Done;
+  }
+
+  shuffle() {
+    const randomState = Array.from(graph.values())[Math.floor(Math.random() * graph.size)]
+      .state;
+
+    this.doNotTurnPls = true;
+
+    setTimeout(
+      action(() => (this.doNotTurnPls = false)),
+      1,
+    );
+
+    this.state = randomState;
+  }
 }
 
 export const AppViewModelContext = createContext<AppViewModel | null>(null);
@@ -235,6 +285,9 @@ export const App = observer(() => {
               </Button>
               <Button minimal onClick={vm.edit} icon={IconNames.Edit}>
                 Edit
+              </Button>
+              <Button minimal onClick={vm.explodeShuffle} icon={IconNames.Random}>
+                Shuffle
               </Button>
             </FlexRow>
           )}
