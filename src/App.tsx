@@ -7,15 +7,7 @@ import { absolute, flexCenter, fullSize, padding } from './styles';
 import { State, StateDto } from './graph/types';
 
 import { FlexColumn, FlexRow } from './components/base/Flex';
-import {
-  Button,
-  Classes,
-  Colors,
-  Dialog,
-  DialogBody,
-  Intent,
-  Tag,
-} from '@blueprintjs/core';
+import { Button, Classes, Colors, Intent, Tag } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
 
 import { mod } from './utils/math';

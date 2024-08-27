@@ -1,6 +1,4 @@
-import { Button, Collapse, Dialog, DialogBody, Divider } from '@blueprintjs/core';
-import { IconNames } from '@blueprintjs/icons';
-import { useState } from 'react';
+import { Dialog, DialogBody, Divider } from '@blueprintjs/core';
 
 export interface InfoDialogProps {
   isOpen: boolean;
