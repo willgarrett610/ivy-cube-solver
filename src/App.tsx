@@ -7,7 +7,15 @@ import { absolute, flexCenter, fullSize, padding } from './styles';
 import { State, StateDto } from './graph/types';
 
 import { FlexColumn, FlexRow } from './components/base/Flex';
-import { Button, Classes, Colors, Intent, Tag } from '@blueprintjs/core';
+import {
+  Button,
+  Classes,
+  Colors,
+  Dialog,
+  DialogBody,
+  Intent,
+  Tag,
+} from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
 
 import { mod } from './utils/math';
@@ -21,7 +29,8 @@ import { makeSimpleAutoObservable } from './utils/mobx';
 import { observer } from 'mobx-react-lite';
 import { cubeColorKeys, cubeColors } from './utils';
 import { action } from 'mobx';
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useState } from 'react';
+import { InfoDialog } from './components/dialogs/InfoDialog';
 
 const graph = genGraph();
 
@@ -249,6 +258,8 @@ export const useAppViewModel = () => {
 };
 
 export const App = observer(() => {
+  const [showDialog, setShowDialog] = useState(false);
+
   const vm = useViewModelConstructor(AppViewModel);
 
   return (
@@ -257,6 +268,27 @@ export const App = observer(() => {
         className={Classes.DARK}
         css={[absolute(), fullSize, flexCenter, { background: Colors.BLACK }]}
       >
+        <div
+          css={[absolute(0, 0), padding('xl'), { zIndex: 100, pointerEvents: 'none' }]}
+        >
+          <div
+            css={{
+              pointerEvents: 'all',
+            }}
+          >
+            <Button
+              minimal
+              icon={IconNames.InfoSign}
+              onClick={() => setShowDialog((p) => !p)}
+            />
+            <InfoDialog
+              isOpen={showDialog}
+              onClose={() => {
+                setShowDialog(false);
+              }}
+            />
+          </div>
+        </div>
         <FlexColumn
           alignItems="center"
           css={[
