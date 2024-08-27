@@ -75,7 +75,6 @@ const cornersData: CornerData[] = [
 export interface IvyCornersProps {
   offset?: number;
   meshProps?: MeshProps;
-  prevCubeState?: StateDto;
   cubeState: StateDto;
   turn?: Turn;
 
@@ -92,7 +91,6 @@ export const IvyCorners = (props: IvyCornersProps) => {
     turn,
     offset = 0,
     meshProps,
-    prevCubeState,
     cubeState,
     onCornerClick,
     onCornerRightClick,
@@ -105,7 +103,7 @@ export const IvyCorners = (props: IvyCornersProps) => {
   const { value: t, reset, isPlaying } = useScale(0, 1, fps, 1_000);
   const v = useMemo(() => easeInOutCubic(t), [t]);
   const angle = useMemo(
-    () => (turn ? lerp(0, -((2 * Math.PI) / 3) * turn.turnDirection, v) : 0),
+    () => (turn ? lerp(((2 * Math.PI) / 3) * turn.turnDirection, 0, v) : 0),
     [turn, v],
   );
 
@@ -115,12 +113,7 @@ export const IvyCorners = (props: IvyCornersProps) => {
     }
   }, [turn, reset]);
 
-  const isTurning = useMemo(() => turn && isPlaying && t < 1, [turn, isPlaying, t]);
-
-  const { corners } = useMemo(
-    () => (isPlaying ? prevCubeState : cubeState) ?? cubeState,
-    [isPlaying, prevCubeState, cubeState],
-  );
+  const corners = useMemo(() => cubeState.corners, [cubeState]);
 
   return (
     <mesh {...meshProps}>
@@ -133,9 +126,7 @@ export const IvyCorners = (props: IvyCornersProps) => {
           <Rotate
             key={i}
             angle={
-              cornerStateRotation +
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- turn is defined if isTurning is true
-              (isTurning && turn!.corner === i ? angle : 0)
+              cornerStateRotation + (isPlaying && turn && turn.corner === i ? angle : 0)
             }
             axis={cornerAxes[i as 0 | 1 | 2 | 3]}
           >

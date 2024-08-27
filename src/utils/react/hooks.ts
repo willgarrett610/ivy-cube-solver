@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export const useIteration = (fps = 60) => {
   const [i, setI] = useState(0);
@@ -35,6 +35,7 @@ export const useScale = (
   const reset = useCallback(() => {
     setStartTime(0);
     setEndTime(0);
+    setValue(startValue);
     setIsPlaying(true);
     play();
   }, [play]);
@@ -57,6 +58,7 @@ export const useScale = (
         if (now >= endTime) {
           clearInterval(interval);
           setIsPlaying(false);
+          setValue(endValue);
         }
       }, 1000 / fps);
 
@@ -65,4 +67,12 @@ export const useScale = (
   }, [startValue, endValue, startTime, endTime, durationMs, fps]);
 
   return { value, isPlaying, reset };
+};
+
+export const usePrevious = <T>(value: T) => {
+  const ref = useRef<T>();
+  useEffect(() => {
+    ref.current = value; //assign the value of ref to the argument
+  }, [value]); //this code will run when the value of 'value' changes
+  return ref.current; //in the end, return the current ref value.
 };

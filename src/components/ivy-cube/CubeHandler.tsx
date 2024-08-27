@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { isStateDtoEqual, StateDto } from '../../graph/types';
 import { IvyCube } from './IvyCube';
 import { getTurnFromStateChange } from '../../graph/util';
+import { usePrevious } from '@blueprintjs/core';
 
 export interface CubeHandlerProps {
   state: StateDto;
@@ -39,26 +40,15 @@ export const CubeHandler = (props: CubeHandlerProps) => {
     onCornerPointerLeave,
   } = props;
 
-  const [stateHistory, setStateHistory] = useState<StateDto[]>([]);
-
-  const prevState = useMemo(() => stateHistory.at(-2), [stateHistory]);
+  const prevState = usePrevious(state);
 
   const turn = useMemo(() => {
-    if (!prevState) return undefined;
+    if (!prevState) {
+      return undefined;
+    }
 
     return getTurnFromStateChange(prevState, state);
-  }, [prevState]);
-
-  useEffect(() => {
-    setStateHistory((prev) => {
-      const lastState = prev.at(-1);
-      if (!lastState || !isStateDtoEqual(state, lastState)) {
-        return [...prev, state];
-      } else {
-        return [...prev];
-      }
-    });
-  }, [state]);
+  }, [prevState, state]);
 
   return (
     <IvyCube
@@ -74,8 +64,7 @@ export const CubeHandler = (props: CubeHandlerProps) => {
       onCornerPointerUp={onCornerPointerUp}
       onCornerPointerEnter={onCornerPointerEnter}
       onCornerPointerLeave={onCornerPointerLeave}
-      turn={turn ?? undefined}
-      prevCubeState={prevState}
+      turn={turn}
       cubeState={state}
     />
   );

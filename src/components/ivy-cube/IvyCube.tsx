@@ -10,13 +10,13 @@ import { IvyCorners } from './IvyCorners';
 import { IvyCenters } from './IvyCenters';
 import { Mode, useAppViewModel } from '../../App';
 import { observer } from 'mobx-react-lite';
+import { Rotate } from '../three/Rotate';
 
 const offset = 3.85;
 const fps = 30;
 
 export interface IvyCubeProps {
   meshProps?: MeshProps;
-  prevCubeState?: StateDto;
   cubeState: StateDto;
   turn?: Turn;
 
@@ -40,7 +40,6 @@ export interface IvyCubeProps {
 export const IvyCube = observer((props: IvyCubeProps) => {
   const {
     meshProps,
-    prevCubeState,
     cubeState,
     turn,
     onCornerClick,
@@ -64,33 +63,34 @@ export const IvyCube = observer((props: IvyCubeProps) => {
   const { value: t } = useScale(0, 1, fps, 2_500);
   const v = easeOutCubic(t);
   const usedOffset = lerp(50, offset, v);
+  const usedAngle = lerp(0, 2 * Math.PI, v);
 
   return (
     <mesh {...meshProps}>
-      <IvyCorners
-        onCornerClick={onCornerClick}
-        onCornerRightClick={onCornerRightClick}
-        onCornerPointerDown={onCornerPointerDown}
-        onCornerPointerUp={onCornerPointerUp}
-        onCornerPointerEnter={onCornerPointerEnter}
-        onCornerPointerLeave={onCornerPointerLeave}
-        prevCubeState={prevCubeState}
-        cubeState={cubeState}
-        offset={usedOffset}
-        turn={usedTurn}
-      />
-      <IvyCenters
-        onCenterClick={onCenterClick}
-        onCenterRightClick={onCenterRightClick}
-        onCenterPointerDown={onCenterPointerDown}
-        onCenterPointerUp={onCenterPointerUp}
-        onCenterPointerEnter={onCenterPointerEnter}
-        onCenterPointerLeave={onCenterPointerLeave}
-        prevCubeState={prevCubeState}
-        cubeState={cubeState}
-        offset={usedOffset}
-        turn={appVm.mode !== Mode.Edit ? usedTurn : undefined}
-      />
+      <Rotate axis={[1, 1, 1]} angle={usedAngle}>
+        <IvyCorners
+          onCornerClick={onCornerClick}
+          onCornerRightClick={onCornerRightClick}
+          onCornerPointerDown={onCornerPointerDown}
+          onCornerPointerUp={onCornerPointerUp}
+          onCornerPointerEnter={onCornerPointerEnter}
+          onCornerPointerLeave={onCornerPointerLeave}
+          cubeState={cubeState}
+          offset={usedOffset}
+          turn={usedTurn}
+        />
+        <IvyCenters
+          onCenterClick={onCenterClick}
+          onCenterRightClick={onCenterRightClick}
+          onCenterPointerDown={onCenterPointerDown}
+          onCenterPointerUp={onCenterPointerUp}
+          onCenterPointerEnter={onCenterPointerEnter}
+          onCenterPointerLeave={onCenterPointerLeave}
+          cubeState={cubeState}
+          offset={usedOffset}
+          turn={appVm.mode !== Mode.Edit ? usedTurn : undefined}
+        />
+      </Rotate>
       <mesh>
         <sphereGeometry args={[offset, 32, 32]} />
         <meshStandardMaterial color={cubeColors.internals} roughness={0.5} />

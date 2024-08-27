@@ -82,7 +82,6 @@ const fps = 30;
 export interface IvyCentersProps {
   offset?: number;
   meshProps?: MeshProps;
-  prevCubeState?: StateDto;
   cubeState: StateDto;
   turn?: Turn;
 
@@ -99,7 +98,6 @@ export const IvyCenters = (props: IvyCentersProps) => {
     turn,
     offset = 0,
     meshProps,
-    prevCubeState,
     cubeState,
     onCenterClick,
     onCenterRightClick,
@@ -108,7 +106,7 @@ export const IvyCenters = (props: IvyCentersProps) => {
   const { value: t, reset, isPlaying } = useScale(0, 1, fps, 1_000);
   const v = useMemo(() => easeInOutCubic(t), [t]);
   const angle = useMemo(
-    () => (turn ? lerp(0, -((2 * Math.PI) / 3) * turn.turnDirection, v) : 0),
+    () => (turn ? lerp(((2 * Math.PI) / 3) * turn.turnDirection, 0, v) : 0),
     [turn, v],
   );
 
@@ -117,8 +115,6 @@ export const IvyCenters = (props: IvyCentersProps) => {
       reset();
     }
   }, [turn, reset]);
-
-  const isTurning = useMemo(() => turn && isPlaying && t < 1, [turn, isPlaying, t]);
 
   const turningCenters = useMemo(
     () => (turn ? cornerToCenterMapping[turn.corner] : []),
@@ -129,10 +125,7 @@ export const IvyCenters = (props: IvyCentersProps) => {
     [turn],
   );
 
-  const { centers } = useMemo(
-    () => (isPlaying ? prevCubeState : cubeState) ?? cubeState,
-    [isPlaying, prevCubeState, cubeState],
-  );
+  const centers = useMemo(() => cubeState.centers, [cubeState]);
 
   return (
     <mesh {...meshProps}>
@@ -165,7 +158,7 @@ export const IvyCenters = (props: IvyCentersProps) => {
           />
         );
 
-        if (isTurning && turningCenters.includes(i)) {
+        if (isPlaying && turningCenters.includes(i)) {
           return (
             <Rotate key={i} angle={angle} axis={turningAxis}>
               {centerComponent}

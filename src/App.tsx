@@ -355,7 +355,7 @@ export const App = observer(() => {
             onCenterRightClick={(center) => vm.handleCenterClick(center, true)}
             state={vm.mode === Mode.Solve ? vm.pathState : vm.state}
           />
-          <OrbitControls target={[0, 0, 0]} />
+          <OrbitControls enablePan={false} target={[0, 0, 0]} />
         </Canvas>
       </div>
     </AppViewModelContext.Provider>
