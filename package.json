@@ -21,7 +21,7 @@
     "@react-three/drei": "^9.111.3",
     "@react-three/fiber": "^8.17.5",
     "@types/three": "^0.167.2",
-    "mobx": "^6.6.2",
+    "mobx": "^6.13.2",
     "mobx-react-lite": "^3.4.3",
     "queue-typescript": "^1.0.1",
     "react": "^18.2.0",
