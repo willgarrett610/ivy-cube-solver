@@ -17,7 +17,7 @@
   "dependencies": {
     "@blueprintjs/core": "^5.11.0",
     "@blueprintjs/icons": "^5.11.0",
-    "@emotion/react": "^11.10.5",
+    "@emotion/react": "^11.13.3",
     "@react-three/drei": "^9.111.3",
     "@react-three/fiber": "^8.17.5",
     "@types/three": "^0.167.2",
