@@ -24,6 +24,13 @@ import { action } from 'mobx';
 import { createContext, useContext, useState } from 'react';
 import { InfoDialog } from './components/dialogs/InfoDialog';
 
+const PUSH_DIR: Record<0 | 1 | 2 | 3, boolean> = {
+  0: true,
+  1: false, // 왼쪽 위 코너: 우클릭이 안쪽이었으니 반대로!
+  2: true,
+  3: true,  // 오른쪽 위 코너: 우클릭이 이미 바깥쪽이므로 그대로
+};
+
 const graph = genGraph();
 
 export enum Mode {
@@ -41,6 +48,7 @@ export enum ExplodingState {
 export class AppViewModel extends BaseViewModel {
   state = State.solved();
   mode = Mode.Play;
+  view: 'front' | 'corner' = 'front';
 
   // this is possibly the sloppiest code I've ever written but this
   // was the easiest hack I could come up with to fix the stupid turning bug
@@ -154,15 +162,20 @@ export class AppViewModel extends BaseViewModel {
     _side: 0 | 1 | 2 | undefined,
     rightClick: boolean,
   ) {
-    if (this.mode === Mode.Solve) return;
+    // if (this.mode === Mode.Solve) return;
 
-    const clockwise = !rightClick;
+    // 우클릭 = push(바깥쪽), 좌클릭 = pull(안쪽)
+    const isPush = rightClick;
+
+    // 이 코너에서 push(우클릭)가 어느 방향인지
+    const pushIsClockwise = PUSH_DIR[corner];
+
+    // push는 그 방향, pull은 반대 방향
+    const clockwise = isPush ? pushIsClockwise : !pushIsClockwise;
 
     if (this.mode === Mode.Play) {
       this.state = this.state.rotate(corner, clockwise);
-    }
-
-    if (this.mode === Mode.Edit) {
+    } else if (this.mode === Mode.Edit) {
       this.state = this.state.rotateCorner(corner, clockwise);
     }
   }
@@ -288,6 +301,8 @@ export const App = observer(() => {
               icon={IconNames.InfoSign}
               onClick={() => setShowDialog((p) => !p)}
             />
+            <button onClick={() => (vm.view = 'front')}>정면 보기</button>
+<button onClick={() => (vm.view = 'corner')}>모서리 보기</button>
             <InfoDialog
               isOpen={showDialog}
               onClose={() => {
@@ -305,31 +320,36 @@ export const App = observer(() => {
           ]}
           gap={5}
         >
+          // trigger pages deploy
           {vm.mode === Mode.Play && (
-            <FlexRow
-              gap={5}
-              css={{
-                pointerEvents: 'all',
-              }}
-            >
-              <Button
-                minimal
-                onClick={vm.solve}
-                icon={IconNames.PredictiveAnalysis}
-                disabled={!vm.isSolvable}
-                intent={vm.isSolvable ? undefined : Intent.WARNING}
-                title={vm.isSolvable ? undefined : 'This cube is not solvable'}
-              >
-                Solve
-              </Button>
-              <Button minimal onClick={vm.edit} icon={IconNames.Edit}>
-                Edit
-              </Button>
-              <Button minimal onClick={vm.explodeShuffle} icon={IconNames.Random}>
-                Shuffle
-              </Button>
-            </FlexRow>
-          )}
+  <FlexRow
+    gap={10}
+    css={{
+      pointerEvents: 'all',
+    }}
+  >
+    {/* 처음 상태로 리셋 */}
+    <Button
+      large
+      intent={Intent.PRIMARY}
+      icon={IconNames.Reset}
+      onClick={vm.reset}
+    >
+      처음 상태
+    </Button>
+
+    {/* 랜덤 섞기(셔플) */}
+    <Button
+      large
+      intent={Intent.SUCCESS}
+      icon={IconNames.Random}
+      onClick={vm.explodeShuffle}
+    >
+      섞기
+    </Button>
+  </FlexRow>
+)}
+
           {vm.mode === Mode.Edit && (
             <>
               <FlexRow
@@ -364,6 +384,7 @@ export const App = observer(() => {
                 {cubeColorKeys
                   .map((key) => ({ key, color: cubeColors[key] }))
                   .map(({ key, color }) => (
+
                     <Button
                       key={key}
                       minimal
@@ -371,10 +392,10 @@ export const App = observer(() => {
                         vm.doNotTurnPls = true;
 
                         setTimeout(
-                          action(() => (vm.doNotTurnPls = false)),
-                          1,
-                        );
-                        vm.editSelectedCenterColor = key;
+                       action(() => (vm.doNotTurnPls = false)),
+                       1,
+                       );
+                       vm.editSelectedCenterColor = key;
                       })}
                       css={[
                         {
@@ -387,9 +408,9 @@ export const App = observer(() => {
                           },
                         },
                         vm.editSelectedCenterColor === key && {
-                          filter: 'brightness(1)',
-                          scale: '1.2',
-                          zIndex: 1,
+                        filter: 'brightness(1)',
+                        scale: '1.2',
+                        zIndex: 1,
                         },
                       ]}
                     />
@@ -428,27 +449,48 @@ export const App = observer(() => {
             </FlexRow>
           )}
         </FlexColumn>
-        <Canvas
-          camera={{
-            position: [10, 10, 10],
-          }}
-        >
-          <ambientLight />
-          <directionalLight position={[0, 0, 5]} color="white" />
-          <directionalLight position={[0, 0, -5]} color="white" />
-          <directionalLight position={[0, 5, 0]} color="white" />
-          <directionalLight position={[0, -5, 0]} color="white" />
-          <CubeHandler
-            onCornerClick={(corner, side) => vm.handleCornerClick(corner, side, false)}
-            onCornerRightClick={(corner, side) =>
-              vm.handleCornerClick(corner, side, true)
-            }
-            onCenterClick={(center) => vm.handleCenterClick(center, false)}
-            onCenterRightClick={(center) => vm.handleCenterClick(center, true)}
-            state={vm.mode === Mode.Solve ? vm.pathState : vm.state}
-          />
-          <OrbitControls enablePan={false} target={[0, 0, 0]} />
-        </Canvas>
+ <Canvas
+  camera={{
+    position: [10, 10, 10],
+  }}
+>
+  <ambientLight />
+  <directionalLight position={[0, 0, 5]} color="white" />
+  <directionalLight position={[0, 0, -5]} color="white" />
+  <directionalLight position={[0, 5, 0]} color="white" />
+  <directionalLight position={[0, -5, 0]} color="white" />
+<group
+  rotation={
+    vm.view === 'front'
+      ? [0, 0, 0]
+      : [Math.PI / 4, Math.PI / 4, 0] // 대각선에서 코너가 보이는 각도 (숫자는 필요하면 조금씩 조절)
+  }
+>
+  <CubeHandler
+    onCornerClick={(corner, side) => {
+      console.log("LEFT CLICK", corner, side);
+      vm.handleCornerClick(corner, side, false);
+    }}
+    onCornerRightClick={(corner, side) => {
+      console.log("RIGHT CLICK", corner, side);
+      vm.handleCornerClick(corner, side, true);
+    }}
+    onCenterClick={(center) => vm.handleCenterClick(center, false)}
+    onCenterRightClick={(center) => vm.handleCenterClick(center, true)}
+    state={vm.mode === Mode.Solve ? vm.pathState : vm.state}
+  />
+</group>
+  <OrbitControls
+  enablePan={false}
+  target={[0, 0, 0]}
+  minPolarAngle={0.3}               // 너무 위/아래는 막고
+  maxPolarAngle={Math.PI - 0.3}
+
+/>
+
+</Canvas>
+
+
       </div>
     </AppViewModelContext.Provider>
   );
